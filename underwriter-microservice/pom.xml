@@ -12,10 +12,10 @@
     <packaging>jar</packaging>
 
     <groupId>com.aline</groupId>
-    <artifactId>microservice-template</artifactId>
+    <artifactId>underwriter-micrservice</artifactId>
     <version>0.1.0</version>
-    <name>microservice-template</name>
-    <description>Microservice template project for Aline Financial</description>
+    <name>underwriter-microservice</name>
+    <description>Underwriter microservice handles member applications and initial account creation while using the bank's main underwriting logic.</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
