@@ -1,6 +1,9 @@
 package com.aline.underwritermicroservice.controller;
 
+import com.aline.core.dto.CreateApplicantDTO;
 import com.aline.core.model.Applicant;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,9 +18,9 @@ import javax.validation.Valid;
 @Slf4j(topic = "Applicants")
 public class ApplicantController {
 
+    @ApiOperation("Create an Applicant")
     @PostMapping
-    public ResponseEntity<Applicant> createApplicant(@RequestBody @Valid Applicant applicant) {
-        log.debug(applicant.toString());
+    public ResponseEntity<Applicant> createApplicant(@RequestBody @Valid CreateApplicantDTO applicant) {
         return ResponseEntity.ok().build();
     }
 
