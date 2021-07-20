@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
+
 @Service
 @RequiredArgsConstructor
 public class ApplicantService {
@@ -14,7 +16,7 @@ public class ApplicantService {
     private final ApplicantRepository repository;
     private final ModelMapper mapper;
 
-    public Applicant createApplicant(CreateApplicantDTO createApplicantDTO) {
+    public Applicant createApplicant(@Valid CreateApplicantDTO createApplicantDTO) {
         Applicant applicant = mapper.map(createApplicantDTO, Applicant.class);
         return repository.save(applicant);
     }
