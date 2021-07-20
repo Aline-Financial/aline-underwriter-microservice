@@ -1,0 +1,16 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: "underwriter-microservice"
+  jpa:
+    hibernate:
+      ddl-auto: create
+  datasource:
+    username: "sa"
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: "h2"
