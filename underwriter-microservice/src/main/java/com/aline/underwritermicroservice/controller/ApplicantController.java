@@ -9,7 +9,10 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +36,9 @@ public class ApplicantController {
 
     /**
      * Create Applicant
-     * Post mapping for <code>/applicants</code> endpoint
+     * <p>
+     *     <code>POST</code> mapping for <code>/applicants</code> endpoint.
+     * </p>
      * @param createApplicantDTO DTO that holds applicant information.
      * @return ResponseEntity with location to the created resource.
      */
@@ -51,7 +56,33 @@ public class ApplicantController {
                 .path("/{id}")
                 .buildAndExpand(applicant.getId())
                 .toUri();
-        return ResponseEntity.created(location).body(applicant);
+        return ResponseEntity
+                .created(location)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(applicant);
+    }
+
+    /**
+     * Get Applicant by ID
+     * <p>
+     *     <code>GET</code> mapping for <code>/applicants</code> endpoint.
+     * </p>
+     * @param id Long representing the applicant's ID.
+     * @return ResponseEntity of the queried applicant if one exists.
+     * @apiNote Exceptions will be caught by the GlobalExceptionHandler
+     */
+    @ApiOperation("Get an Applicant By ID")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Applicant was found."),
+            @ApiResponse(code = 404, message = "Applicant does not exist.")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<Applicant> getApplicantById(@PathVariable long id) {
+        Applicant applicant = service.getApplicantById(id);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(applicant);
     }
 
 }

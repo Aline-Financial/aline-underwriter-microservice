@@ -4,6 +4,7 @@ import com.aline.core.dto.CreateApplicantDTO;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
+import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class ApplicantService {
     private final ModelMapper mapper;
 
     /**
-     * Creates an {@link Applicant} entity with validation.
+     * Creates an applicant entity with validation.
      * <p>
      *     Entity must be unique to be saved.
      * </p>
@@ -45,6 +46,16 @@ public class ApplicantService {
             throw new ConflictException("Social Security number already exists.");
         }
         return repository.save(applicant);
+    }
+
+    /**
+     * Finds an applicant entity by <code>id</code> property.
+     * @param id ID of the Applicant being queried.
+     * @return Applicant with queried ID.
+     * @throws ApplicantNotFoundException If applicant with the queried ID does not exist.
+     */
+    public Applicant getApplicantById(long id) {
+        return repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
     }
 
 }
