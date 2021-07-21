@@ -3,7 +3,6 @@ package com.aline.underwritermicroservice.controller;
 import com.aline.core.dto.CreateApplicantDTO;
 import com.aline.core.model.Applicant;
 import com.aline.underwritermicroservice.service.ApplicantService;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
