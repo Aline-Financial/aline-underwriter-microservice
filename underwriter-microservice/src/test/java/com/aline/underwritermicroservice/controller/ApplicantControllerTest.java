@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.dto.CreateApplicantDTO;
+import com.aline.core.dto.UpdateApplicantDTO;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
@@ -26,8 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -170,10 +173,10 @@ class ApplicantControllerTest {
 
     @Test
     void getApplicantById_status_is_ok_applicant_id_is_equal_to_request_id_param() throws Exception {
-        mock.perform(get("/applicants/1"))
+        mock.perform(get("/applicants/3"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(jsonPath("$.id").value(3));
     }
 
     @Test
@@ -197,6 +200,49 @@ class ApplicantControllerTest {
                 .andExpect(header().exists("location"));
     }
 
+    @Test
+    void updateApplicant_status_is_noContent_and_info_successfully_updated() throws Exception {
+        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+                .firstName("Clark")
+                .lastName("Kent").build();
+
+        Applicant applicantBeforeUpdate = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
+
+        String body = mapper.writeValueAsString(updateApplicantDTO);
+
+        mock.perform(put("/applicants/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isNoContent());
+
+        Applicant updatedApplicant = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
+        assertEquals(updateApplicantDTO.getFirstName(), updatedApplicant.getFirstName());
+        assertEquals(updateApplicantDTO.getLastName(), updatedApplicant.getLastName());
+
+        // Make sure no other values were updated.
+        assertEquals(applicantBeforeUpdate.getEmail(), updatedApplicant.getEmail());
+    }
+
+    @Test
+    void updateApplicant_status_is_notFound_if_applicant_exists() throws Exception {
+
+        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+                .income(100000000).build();
+
+        String body = mapper.writeValueAsString(updateApplicantDTO);
+
+        mock.perform(put("/applicants/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Validation tests for CreateApplicantDTO
+     * <p>
+     *     <em>Same validation for {@link UpdateApplicantDTO} but fields can be nullable.</em>
+     * </p>
+     */
     @Nested
     @DisplayName("createApplicant status is 400 BAD REQUEST")
     class CreateApplicantStatusIsBadRequest {
