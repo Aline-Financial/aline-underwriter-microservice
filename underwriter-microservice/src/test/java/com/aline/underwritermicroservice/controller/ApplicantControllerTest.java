@@ -70,6 +70,9 @@ class ApplicantControllerTest {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.setDateFormat(dateFormat);
+
+        log.info("Object Mapper initialized.");
+
         dtoBuilder = CreateApplicantDTO.builder()
                 .firstName("Test")
                 .lastName("Boy")
@@ -88,6 +91,8 @@ class ApplicantControllerTest {
                 .mailingState("Maine")
                 .mailingZipcode("12345")
                 .income(4500000);
+
+        log.info("CreateApplicantDTOBuilder initialized.");
     }
 
     @BeforeEach
@@ -157,6 +162,7 @@ class ApplicantControllerTest {
                         .build()
         );
         repository.saveAll(applicants);
+        log.info("Created 3 test applicants and saved to in memory database.");
     }
 
     /**
@@ -309,7 +315,7 @@ class ApplicantControllerTest {
         @Test
         void when_gender_value_is_not_allowed() throws Exception {
             // Allowed gender values: Male, Female, Other, Not Specified
-            expectBadRequest(dtoBuilder.gender("InvalidGender").build());
+            expectBadRequest(dtoBuilder.gender("Apache Attack Helicopter").build());
         }
 
         @Test
