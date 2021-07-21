@@ -19,6 +19,17 @@ public class ApplicantService {
     private final ApplicantRepository repository;
     private final ModelMapper mapper;
 
+    /**
+     * Creates an {@link Applicant} entity with validation.
+     * <p>
+     *     Entity must be unique to be saved.
+     * </p>
+     * <p>
+     *     <em>A unique entity contains a unique email, phone number, driver's license, Social Security number.</em>
+     * </p>
+     * @param createApplicantDTO DTO that contains all of the applicant information.
+     * @return Applicant saved by the {@link ApplicantRepository}
+     */
     public Applicant createApplicant(@Valid CreateApplicantDTO createApplicantDTO) {
         Applicant applicant = mapper.map(createApplicantDTO, Applicant.class);
         if (repository.existsByEmail(applicant.getEmail())) {

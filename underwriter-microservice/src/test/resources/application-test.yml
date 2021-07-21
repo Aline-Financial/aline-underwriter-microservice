@@ -2,17 +2,14 @@ server:
   port: 8071
 
 spring:
-  profiles:
-    active: "test"
   application:
     name: "underwriter-microservice"
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
   datasource:
     username: "sa"
     password: ""
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
+    driver-class-name: org.h2.Driver
+    generate-unique-name: false
+    name: "test-db"
