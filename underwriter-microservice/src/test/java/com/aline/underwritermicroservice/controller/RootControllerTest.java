@@ -9,8 +9,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+/**
+ * Integration test for {@link RootController}
+ */
 @SpringBootTest
+@AutoConfigureMockMvc
 class RootControllerTest {
 
     @Autowired
