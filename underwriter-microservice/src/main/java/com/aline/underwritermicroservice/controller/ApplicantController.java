@@ -4,6 +4,7 @@ import com.aline.core.dto.CreateApplicantDTO;
 import com.aline.core.dto.UpdateApplicantDTO;
 import com.aline.core.model.Applicant;
 import com.aline.underwritermicroservice.service.ApplicantService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -27,6 +28,7 @@ import java.net.URI;
  * Applicant Controller
  * <p>CRUD endpoints for {@link Applicant} entity.</p>
  */
+@Api(value = "/applicants")
 @RestController
 @RequestMapping("/applicants")
 @RequiredArgsConstructor
@@ -73,7 +75,7 @@ public class ApplicantController {
      * @return ResponseEntity of the queried applicant if one exists.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @ApiOperation("Get an Applicant by ID")
+    @ApiOperation("Get Applicant by ID")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Applicant was found."),
             @ApiResponse(code = 404, message = "Applicant does not exist.")
