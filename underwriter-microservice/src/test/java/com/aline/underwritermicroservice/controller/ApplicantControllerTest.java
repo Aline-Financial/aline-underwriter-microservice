@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -235,6 +236,19 @@ class ApplicantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteApplicant_status_is_noContent_when_applicant_is_successfully_deleted() throws Exception {
+        mock.perform(delete("/applicants/2"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteApplicant_status_is_notFound_when_applicant_to_delete_does_not_exists() throws Exception {
+        mock.perform(delete("/applicants/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(new ApplicantNotFoundException().getMessage()));
     }
 
     /**

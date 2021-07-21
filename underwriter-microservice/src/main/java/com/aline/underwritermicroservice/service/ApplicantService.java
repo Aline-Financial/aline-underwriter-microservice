@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 
+/**
+ * Applicant Service
+ * <p>Service methods for manipulating {@link Applicant} entities.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ApplicantService {
@@ -73,6 +77,19 @@ public class ApplicantService {
         mapper.getConfiguration().setSkipNullEnabled(true);
         mapper.map(newValues, toUpdate);
         repository.save(toUpdate);
+    }
+
+    /**
+     * Delete applicant entity with specified ID.
+     * <p>
+     *    <em>Deletes the applicant if the applicant exists.</em>
+     * </p>
+     * @param id ID of the applicant to be deleted.
+     * @throws ApplicantNotFoundException If applicant with the queried ID does not exist.
+     */
+    public void deleteApplicant(long id) {
+        Applicant toDelete = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
+        repository.delete(toDelete);
     }
 
 }
