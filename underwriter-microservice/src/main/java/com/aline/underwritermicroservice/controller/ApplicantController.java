@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -93,7 +94,7 @@ public class ApplicantController {
      * Update applicant by ID
      * @param id The ID of the applicant to update.
      * @param newValues The new values to update the applicant with.
-     * @return ResponseEntity with status <code>204</code> if update was successful.
+     * @return ResponseEntity with status <code>204 NO CONTENT</code> if update was successful.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
     @ApiOperation("Update an Applicant by ID")
@@ -105,6 +106,26 @@ public class ApplicantController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateApplicant(@PathVariable long id, @RequestBody @Valid UpdateApplicantDTO newValues) {
         service.updateApplicant(id, newValues);
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+
+    /**
+     * Delete applicant by ID
+     * @param id The ID of the applicant to delete.
+     * @return ResponseEntity with status <code>204 NO CONTENT</code> if applicant was deleted successfully.
+     * @apiNote Exceptions will be caught by the GlobalExceptionHandler
+     */
+    @ApiOperation("Delete an Applicant by ID")
+    @ApiResponses({
+            @ApiResponse(code = 204, message = "Applicant was successfully deleted."),
+            @ApiResponse(code = 404, message = "Applicant to delete was not found.")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteApplicant(@PathVariable long id) {
+        service.deleteApplicant(id);
         return ResponseEntity
                 .noContent()
                 .build();

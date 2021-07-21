@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static com.aline.core.model.Applicant.ApplicantBuilder;
@@ -27,6 +29,9 @@ import static com.aline.core.dto.UpdateApplicantDTO.UpdateApplicantDTOBuilder;
 
 @SpringBootTest
 class ApplicantServiceTest {
+
+    private final long FOUND = 1;
+    private final long NOT_FOUND = 2;
 
     @Autowired
     ApplicantService service;
@@ -42,6 +47,7 @@ class ApplicantServiceTest {
 
     CreateApplicantDTOBuilder createApplicantDTOBuilder;
     UpdateApplicantDTOBuilder updateApplicantDTOBuilder;
+    Applicant foundApplicant;
 
     @BeforeEach
     void setUp() {
@@ -88,8 +94,10 @@ class ApplicantServiceTest {
                 .createdAt(LocalDateTime.now())
                 .lastModifiedAt(LocalDateTime.now());
 
-        when(repository.findById(1L)).thenReturn(Optional.of(applicantBuilder.build()));
-        when(repository.findById(2L)).thenReturn(Optional.empty());
+        foundApplicant = applicantBuilder.build();
+
+        when(repository.findById(FOUND)).thenReturn(Optional.of(foundApplicant));
+        when(repository.findById(NOT_FOUND)).thenReturn(Optional.empty());
         when(repository.save(applicantBuilder
                 .id(null)
                 .createdAt(null)
@@ -165,7 +173,7 @@ class ApplicantServiceTest {
                 .email("already.exists@email.com")
                 .build();
 
-        assertThrows(EmailConflictException.class, () -> service.updateApplicant(1, dto));
+        assertThrows(EmailConflictException.class, () -> service.updateApplicant(FOUND, dto));
     }
 
     @Test
@@ -174,7 +182,7 @@ class ApplicantServiceTest {
                 .phone("(222) 222-2222")
                 .build();
 
-        assertThrows(PhoneConflictException.class, () -> service.updateApplicant(1, dto));
+        assertThrows(PhoneConflictException.class, () -> service.updateApplicant(FOUND, dto));
     }
 
     @Test
@@ -183,7 +191,7 @@ class ApplicantServiceTest {
                 .driversLicense("ALREADY_EXISTS")
                 .build();
 
-        assertThrows(ConflictException.class, () -> service.updateApplicant(1, dto));
+        assertThrows(ConflictException.class, () -> service.updateApplicant(FOUND, dto));
     }
 
     @Test
@@ -192,7 +200,33 @@ class ApplicantServiceTest {
                 .socialSecurity("222-22-2222")
                 .build();
 
-        assertThrows(ConflictException.class, () -> service.updateApplicant(1, dto));
+        assertThrows(ConflictException.class, () -> service.updateApplicant(FOUND, dto));
+    }
+
+    @Test
+    void updateApplicant_throws_applicantNotFoundException_when_applicant_does_not_exist() {
+        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+                .firstName("NewName")
+                .build();
+
+        assertThrows(ApplicantNotFoundException.class, () -> service.updateApplicant(NOT_FOUND, dto));
+    }
+
+    @Test
+    void updateApplicant_calls_repository_save_when_applicant_exists() {
+        service.updateApplicant(FOUND, updateApplicantDTOBuilder.build());
+        verify(repository, times(1)).save(foundApplicant);
+    }
+
+    @Test
+    void deleteApplicant_throws_applicantNotFoundException_when_applicant_does_not_exist() {
+        assertThrows(ApplicantNotFoundException.class, () -> service.deleteApplicant(NOT_FOUND));
+    }
+
+    @Test
+    void deleteApplicant_calls_repository_delete_when_applicant_exists() {
+        service.deleteApplicant(FOUND);
+        verify(repository, times(1)).delete(foundApplicant);
     }
 
 }

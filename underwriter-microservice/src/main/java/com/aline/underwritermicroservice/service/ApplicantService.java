@@ -8,6 +8,7 @@ import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,10 @@ public class ApplicantService {
     public Applicant createApplicant(@Valid CreateApplicantDTO createApplicantDTO) {
         ModelMapper mapper = new ModelMapper();
         Applicant applicant = mapper.map(createApplicantDTO, Applicant.class);
-        validateUniqueness(applicant);
+        validateUniqueness(applicant.getEmail(),
+                applicant.getPhone(),
+                applicant.getDriversLicense(),
+                applicant.getSocialSecurity());
         return repository.save(applicant);
     }
 
@@ -61,12 +65,15 @@ public class ApplicantService {
      *
      */
     public void updateApplicant(long id, @Valid UpdateApplicantDTO newValues) {
+        validateUniqueness(newValues.getEmail(),
+                newValues.getPhone(),
+                newValues.getDriversLicense(),
+                newValues.getSocialSecurity());
         Applicant toUpdate = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
         ModelMapper mapper = new ModelMapper();
         // Allows for null values in the DTO to not affect the entity
         mapper.getConfiguration().setSkipNullEnabled(true);
         mapper.map(newValues, toUpdate);
-        validateUniqueness(toUpdate);
         repository.save(toUpdate);
     }
 
@@ -88,19 +95,26 @@ public class ApplicantService {
      * <p>
      *     Use when saving or updating an applicant.
      * </p>
-     * @param applicant Applicant entity to verify uniqueness.
+     * @param email Email string to be checked.
+     * @param phone Phone string to be checked.
+     * @param driversLicense Driver's license to be checked.
+     * @param socialSecurity Social Security number to be checked.
      * @throws EmailConflictException If an {@link Applicant} with email already exists.
      * @throws PhoneConflictException If an {@link Applicant} with phone already exists.
      * @throws ConflictException If driver's license or Social Security already exists.
      */
-    private void validateUniqueness(Applicant applicant) {
-        if (repository.existsByEmail(applicant.getEmail()))
+    private void validateUniqueness(
+            String email,
+            String phone,
+            String driversLicense,
+            String socialSecurity) {
+        if (repository.existsByEmail(email) && email != null)
             throw new EmailConflictException();
-        if (repository.existsByPhone(applicant.getPhone()))
+        if (repository.existsByPhone(phone) && phone != null)
             throw new PhoneConflictException();
-        if (repository.existsByDriversLicense(applicant.getDriversLicense()))
+        if (repository.existsByDriversLicense(driversLicense) && driversLicense != null)
             throw new ConflictException("Driver's license already exists.");
-        if (repository.existsBySocialSecurity(applicant.getSocialSecurity()))
+        if (repository.existsBySocialSecurity(socialSecurity) && socialSecurity != null)
             throw new ConflictException("Social Security number already exists.");
     }
 

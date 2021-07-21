@@ -6,10 +6,8 @@ import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,12 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -47,56 +42,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j(topic = "Applicant Controller Integration Test")
 class ApplicantControllerTest {
 
-    @Autowired
-    MockMvc mock;
+    ApplicantRepository repository;
 
     @Autowired
-    ApplicantRepository repository;
+    MockMvc mock;
 
     /**
      * Object mapper used to map CreateApplicantDTO to a JSON.
      */
-    static ObjectMapper mapper;
+    @Autowired
+    ObjectMapper mapper;
 
     /**
      * CreateApplicantDTOBuilder for modification and reuse.
      */
     static CreateApplicantDTO.CreateApplicantDTOBuilder dtoBuilder;
 
-    @BeforeAll
-    static void setUpForAll() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.setDateFormat(dateFormat);
+    @Autowired
+    public void setRepository(ApplicantRepository repository) {
 
-        log.info("Object Mapper initialized.");
+        this.repository = repository;
 
-        dtoBuilder = CreateApplicantDTO.builder()
-                .firstName("Test")
-                .lastName("Boy")
-                .gender("Male")
-                .dateOfBirth(LocalDate.of(1980, 5, 3))
-                .email("testboy@test.com")
-                .phone("(555) 555-5555")
-                .socialSecurity("555-55-5555")
-                .driversLicense("DL555555")
-                .address("1234 Address St.")
-                .city("Townsville")
-                .state("Maine")
-                .zipcode("12345")
-                .mailingAddress("PO Box 1234")
-                .mailingCity("Townsville")
-                .mailingState("Maine")
-                .mailingZipcode("12345")
-                .income(4500000);
-
-        log.info("CreateApplicantDTOBuilder initialized.");
-    }
-
-    @BeforeEach
-    void setUp() {
         List<Applicant> applicants = Arrays.asList(
                 Applicant.builder()
                         .id(1L)
@@ -161,8 +127,34 @@ class ApplicantControllerTest {
                         .income(100000000)
                         .build()
         );
-        repository.saveAll(applicants);
-        log.info("Created 3 test applicants and saved to in memory database.");
+        this.repository.saveAll(applicants);
+        log.info("Created {} test applicants and saved to in memory database.", applicants.size());
+
+    }
+
+    @BeforeAll
+    static void setUpForAll() {
+
+        dtoBuilder = CreateApplicantDTO.builder()
+                .firstName("Test")
+                .lastName("Boy")
+                .gender("Male")
+                .dateOfBirth(LocalDate.of(1980, 5, 3))
+                .email("testboy@test.com")
+                .phone("(555) 555-5555")
+                .socialSecurity("555-55-5555")
+                .driversLicense("DL555555")
+                .address("1234 Address St.")
+                .city("Townsville")
+                .state("Maine")
+                .zipcode("12345")
+                .mailingAddress("PO Box 1234")
+                .mailingCity("Townsville")
+                .mailingState("Maine")
+                .mailingZipcode("12345")
+                .income(4500000);
+
+        log.info("CreateApplicantDTOBuilder initialized.");
     }
 
     /**
@@ -246,7 +238,30 @@ class ApplicantControllerTest {
 
     @Test
     void deleteApplicant_status_is_noContent_when_applicant_is_successfully_deleted() throws Exception {
-        mock.perform(delete("/applicants/2"))
+        Applicant toDelete = Applicant.builder()
+                .id(4L)
+                .firstName("Barry")
+                .lastName("Allen")
+                .gender("Male")
+                .dateOfBirth(LocalDate.of(1998, 12, 13))
+                .email("theflash@email.com")
+                .phone("(111) 111-1111")
+                .socialSecurity("111-11-1111")
+                .driversLicense("FL1111")
+                .address("123 Speed Force Ln")
+                .city("Central City")
+                .state("New Jersey")
+                .zipcode("11111")
+                .mailingAddress("PO Box 1111")
+                .mailingCity("Metropolis")
+                .mailingState("New York")
+                .mailingZipcode("54321")
+                .income(2500000)
+                .build();
+
+        repository.save(toDelete);
+
+        mock.perform(delete("/applicants/4"))
                 .andExpect(status().isNoContent());
     }
 
@@ -484,4 +499,5 @@ class ApplicantControllerTest {
         }
 
     }
+
 }
