@@ -21,9 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
