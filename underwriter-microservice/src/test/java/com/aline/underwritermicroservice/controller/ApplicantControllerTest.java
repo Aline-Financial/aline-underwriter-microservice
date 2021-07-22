@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Applicant Controller Integration Test")
 @Slf4j(topic = "Applicant Controller Integration Test")
-@Sql(scripts = "/scripts/insert_applicants.sql")
+@Sql(scripts = "/scripts/applicants.sql")
 @Transactional
 class ApplicantControllerTest {
 
