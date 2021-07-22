@@ -16,9 +16,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,8 +43,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Applicant Controller Integration Test")
 @Slf4j(topic = "Applicant Controller Integration Test")
+@Sql(scripts = "/scripts/insert_applicants.sql")
+@Transactional
 class ApplicantControllerTest {
 
+    @Autowired
     ApplicantRepository repository;
 
     @Autowired
@@ -57,80 +63,6 @@ class ApplicantControllerTest {
      * CreateApplicantDTOBuilder for modification and reuse.
      */
     static CreateApplicant.CreateApplicantBuilder createBuilder;
-
-    @Autowired
-    public void setRepository(ApplicantRepository repository) {
-
-        this.repository = repository;
-
-        List<Applicant> applicants = Arrays.asList(
-                Applicant.builder()
-                        .id(1L)
-                        .firstName("John")
-                        .lastName("Smith")
-                        .gender("Male")
-                        .dateOfBirth(LocalDate.of(1995, 6, 23))
-                        .email("johnsmith@email.com")
-                        .phone("(222) 222-2222")
-                        .socialSecurity("222-22-2222")
-                        .driversLicense("DL222222")
-                        .address("321 Main St.")
-                        .city("Townsville")
-                        .state("Maine")
-                        .zipcode("12345")
-                        .mailingAddress("PO Box 1234")
-                        .mailingCity("Townsville")
-                        .mailingState("Maine")
-                        .mailingZipcode("12345")
-                        .income(7500000)
-                        .build(),
-
-                Applicant.builder()
-                        .id(2L)
-                        .firstName("Mary")
-                        .lastName("Jane")
-                        .gender("Female")
-                        .dateOfBirth(LocalDate.of(1998, 2, 12))
-                        .email("maryjane@email.com")
-                        .phone("(444) 444-4444")
-                        .socialSecurity("444-44-4444")
-                        .driversLicense("DL444444")
-                        .address("888 County Lane")
-                        .city("Village City")
-                        .state("New Jersey")
-                        .zipcode("54321")
-                        .mailingAddress("888 County Lane")
-                        .mailingCity("Village City")
-                        .mailingState("New Jersey")
-                        .mailingZipcode("54321")
-                        .income(12000000)
-                        .build(),
-
-                Applicant.builder()
-                        .id(3L)
-                        .firstName("Bruce")
-                        .lastName("Wayne")
-                        .gender("Male")
-                        .dateOfBirth(LocalDate.of(1980, 10, 13))
-                        .email("iambatman@email.com")
-                        .phone("(999) 999-9999")
-                        .socialSecurity("999-99-9999")
-                        .driversLicense("BAT99999")
-                        .address("500 Wayne Manor")
-                        .city("Gotham")
-                        .state("Illinois")
-                        .zipcode("99999")
-                        .mailingAddress("PO Box 9999")
-                        .mailingCity("Metropolis")
-                        .mailingState("New York")
-                        .mailingZipcode("54321")
-                        .income(100000000)
-                        .build()
-        );
-        this.repository.saveAll(applicants);
-        log.info("Created {} test applicants and saved to in memory database.", applicants.size());
-
-    }
 
     @BeforeAll
     static void setUpForAll() {
@@ -238,29 +170,6 @@ class ApplicantControllerTest {
 
     @Test
     void deleteApplicant_status_is_noContent_when_applicant_is_successfully_deleted() throws Exception {
-        Applicant toDelete = Applicant.builder()
-                .id(4L)
-                .firstName("Barry")
-                .lastName("Allen")
-                .gender("Male")
-                .dateOfBirth(LocalDate.of(1998, 12, 13))
-                .email("theflash@email.com")
-                .phone("(111) 111-1111")
-                .socialSecurity("111-11-1111")
-                .driversLicense("FL1111")
-                .address("123 Speed Force Ln")
-                .city("Central City")
-                .state("New Jersey")
-                .zipcode("11111")
-                .mailingAddress("PO Box 1111")
-                .mailingCity("Metropolis")
-                .mailingState("New York")
-                .mailingZipcode("54321")
-                .income(2500000)
-                .build();
-
-        repository.save(toDelete);
-
         mock.perform(delete("/applicants/4"))
                 .andExpect(status().isNoContent());
     }

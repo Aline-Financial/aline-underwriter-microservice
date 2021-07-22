@@ -19,14 +19,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.aline.core.dto.request.CreateApplicant.CreateApplicantBuilder;
+import static com.aline.core.dto.request.UpdateApplicant.UpdateApplicantBuilder;
+import static com.aline.core.model.Applicant.ApplicantBuilder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static com.aline.core.model.Applicant.ApplicantBuilder;
-import static com.aline.core.dto.request.CreateApplicant.CreateApplicantBuilder;
-import static com.aline.core.dto.request.UpdateApplicant.UpdateApplicantBuilder;
 
 @SpringBootTest
 class ApplicantServiceTest {
