@@ -1,7 +1,8 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.dto.CreateApplicantDTO;
-import com.aline.core.dto.UpdateApplicantDTO;
+import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.request.UpdateApplicant;
+import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
@@ -24,8 +25,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static com.aline.core.model.Applicant.ApplicantBuilder;
-import static com.aline.core.dto.CreateApplicantDTO.CreateApplicantDTOBuilder;
-import static com.aline.core.dto.UpdateApplicantDTO.UpdateApplicantDTOBuilder;
+import static com.aline.core.dto.request.CreateApplicant.CreateApplicantBuilder;
+import static com.aline.core.dto.request.UpdateApplicant.UpdateApplicantBuilder;
 
 @SpringBootTest
 class ApplicantServiceTest {
@@ -45,13 +46,13 @@ class ApplicantServiceTest {
     @MockBean
     ApplicantRepository repository;
 
-    CreateApplicantDTOBuilder createApplicantDTOBuilder;
-    UpdateApplicantDTOBuilder updateApplicantDTOBuilder;
+    CreateApplicantBuilder createBuilder;
+    UpdateApplicantBuilder updateBuilder;
     Applicant foundApplicant;
 
     @BeforeEach
     void setUp() {
-        createApplicantDTOBuilder = CreateApplicantDTO.builder()
+        createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
                 .gender("Male")
@@ -70,7 +71,7 @@ class ApplicantServiceTest {
                 .mailingZipcode("12345")
                 .income(4500000);
 
-        updateApplicantDTOBuilder = UpdateApplicantDTO.builder();
+        updateBuilder = UpdateApplicant.builder();
 
         ApplicantBuilder applicantBuilder = Applicant.builder()
                 .id(1L)
@@ -111,7 +112,7 @@ class ApplicantServiceTest {
 
     @Test
     void getApplicantById_returns_applicant_with_correct_id() {
-        Applicant applicant = service.getApplicantById(1L);
+        ApplicantResponse applicant = service.getApplicantById(1L);
         assertEquals(1, applicant.getId());
     }
 
@@ -122,8 +123,8 @@ class ApplicantServiceTest {
 
     @Test
     void createApplicant_returns_applicant_with_correct_unique_identifiers() {
-        CreateApplicantDTO dto = createApplicantDTOBuilder.build();
-        Applicant created = service.createApplicant(dto);
+        CreateApplicant dto = createBuilder.build();
+        ApplicantResponse created = service.createApplicant(dto);
         assertEquals(dto.getFirstName(), created.getFirstName());
         assertEquals(dto.getLastName(), created.getLastName());
         assertEquals(dto.getEmail(), created.getEmail());
@@ -133,7 +134,7 @@ class ApplicantServiceTest {
 
     @Test
     void createApplicant_throws_emailConflictException_when_email_already_exists() {
-        CreateApplicantDTO dto = createApplicantDTOBuilder
+        CreateApplicant dto = createBuilder
                 .email("already.exists@email.com")
                 .build();
 
@@ -142,7 +143,7 @@ class ApplicantServiceTest {
 
     @Test
     void createApplicant_throws_phoneConflictException_when_phoneNumber_already_exists() {
-        CreateApplicantDTO dto = createApplicantDTOBuilder
+        CreateApplicant dto = createBuilder
                 .phone("(222) 222-2222")
                 .build();
 
@@ -151,7 +152,7 @@ class ApplicantServiceTest {
 
     @Test
     void createApplicant_throws_conflictException_when_driversLicense_already_exists() {
-        CreateApplicantDTO dto = createApplicantDTOBuilder
+        CreateApplicant dto = createBuilder
                 .driversLicense("ALREADY_EXISTS")
                 .build();
 
@@ -160,7 +161,7 @@ class ApplicantServiceTest {
 
     @Test
     void createApplicant_throws_conflictException_when_socialSecurity_already_exists() {
-        CreateApplicantDTO dto = createApplicantDTOBuilder
+        CreateApplicant dto = createBuilder
                 .socialSecurity("222-22-2222")
                 .build();
 
@@ -169,7 +170,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_throws_emailConflictException_when_email_already_exists() {
-        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+        UpdateApplicant dto = updateBuilder
                 .email("already.exists@email.com")
                 .build();
 
@@ -178,7 +179,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_throws_phoneConflictException_when_phoneNumber_already_exists() {
-        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+        UpdateApplicant dto = updateBuilder
                 .phone("(222) 222-2222")
                 .build();
 
@@ -187,7 +188,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_throws_conflictException_when_driversLicense_already_exists() {
-        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+        UpdateApplicant dto = updateBuilder
                 .driversLicense("ALREADY_EXISTS")
                 .build();
 
@@ -196,7 +197,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_throws_conflictException_when_socialSecurity_already_exists() {
-        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+        UpdateApplicant dto = updateBuilder
                 .socialSecurity("222-22-2222")
                 .build();
 
@@ -205,7 +206,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_throws_applicantNotFoundException_when_applicant_does_not_exist() {
-        UpdateApplicantDTO dto = updateApplicantDTOBuilder
+        UpdateApplicant dto = updateBuilder
                 .firstName("NewName")
                 .build();
 
@@ -214,7 +215,7 @@ class ApplicantServiceTest {
 
     @Test
     void updateApplicant_calls_repository_save_when_applicant_exists() {
-        service.updateApplicant(FOUND, updateApplicantDTOBuilder.build());
+        service.updateApplicant(FOUND, updateBuilder.build());
         verify(repository, times(1)).save(foundApplicant);
     }
 

@@ -1,7 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
-import com.aline.core.dto.CreateApplicantDTO;
-import com.aline.core.dto.UpdateApplicantDTO;
+import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
@@ -56,7 +56,7 @@ class ApplicantControllerTest {
     /**
      * CreateApplicantDTOBuilder for modification and reuse.
      */
-    static CreateApplicantDTO.CreateApplicantDTOBuilder dtoBuilder;
+    static CreateApplicant.CreateApplicantBuilder createBuilder;
 
     @Autowired
     public void setRepository(ApplicantRepository repository) {
@@ -135,7 +135,7 @@ class ApplicantControllerTest {
     @BeforeAll
     static void setUpForAll() {
 
-        dtoBuilder = CreateApplicantDTO.builder()
+        createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
                 .gender("Male")
@@ -159,10 +159,10 @@ class ApplicantControllerTest {
 
     /**
      * Shortcut for performing a POST to <code>/applicants</code> and expect a bad request.
-     * @param invalidApplicantDTO Modified {@link CreateApplicantDTO} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
+     * @param invalidApplicantDTO Modified {@link CreateApplicant} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
      * @throws Exception thrown from <code>perform</code>.
      */
-    private void expectBadRequest(CreateApplicantDTO invalidApplicantDTO) throws Exception {
+    private void expectBadRequest(CreateApplicant invalidApplicantDTO) throws Exception {
         String body = mapper.writeValueAsString(invalidApplicantDTO);
         mock.perform(post("/applicants")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -188,8 +188,8 @@ class ApplicantControllerTest {
     @Test
     void createApplicant_status_is_created_and_location_is_in_header() throws Exception {
 
-        CreateApplicantDTO createApplicantDTO = dtoBuilder.build();
-        String body = mapper.writeValueAsString(createApplicantDTO);
+        CreateApplicant createApplicant = createBuilder.build();
+        String body = mapper.writeValueAsString(createApplicant);
 
         mock.perform(post("/applicants")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -201,13 +201,13 @@ class ApplicantControllerTest {
 
     @Test
     void updateApplicant_status_is_noContent_and_info_successfully_updated() throws Exception {
-        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+        UpdateApplicant updateApplicant = UpdateApplicant.builder()
                 .firstName("Clark")
                 .lastName("Kent").build();
 
         Applicant applicantBeforeUpdate = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
 
-        String body = mapper.writeValueAsString(updateApplicantDTO);
+        String body = mapper.writeValueAsString(updateApplicant);
 
         mock.perform(put("/applicants/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -215,8 +215,8 @@ class ApplicantControllerTest {
                 .andExpect(status().isNoContent());
 
         Applicant updatedApplicant = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
-        assertEquals(updateApplicantDTO.getFirstName(), updatedApplicant.getFirstName());
-        assertEquals(updateApplicantDTO.getLastName(), updatedApplicant.getLastName());
+        assertEquals(updateApplicant.getFirstName(), updatedApplicant.getFirstName());
+        assertEquals(updateApplicant.getLastName(), updatedApplicant.getLastName());
 
         // Make sure no other values were updated.
         assertEquals(applicantBeforeUpdate.getEmail(), updatedApplicant.getEmail());
@@ -225,10 +225,10 @@ class ApplicantControllerTest {
     @Test
     void updateApplicant_status_is_notFound_if_applicant_exists() throws Exception {
 
-        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+        UpdateApplicant updateApplicant = UpdateApplicant.builder()
                 .income(100000000).build();
 
-        String body = mapper.writeValueAsString(updateApplicantDTO);
+        String body = mapper.writeValueAsString(updateApplicant);
 
         mock.perform(put("/applicants/99")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +275,7 @@ class ApplicantControllerTest {
     /**
      * Validation tests for CreateApplicantDTO
      * <p>
-     *     <em>Same validation for {@link UpdateApplicantDTO} but fields can be nullable.</em>
+     *     <em>Same validation for {@link UpdateApplicant} but fields can be nullable.</em>
      * </p>
      */
     @Nested
@@ -284,218 +284,218 @@ class ApplicantControllerTest {
 
         @Test
         void when_firstName_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("Name123").build());
+            expectBadRequest(createBuilder.firstName("Name123").build());
         }
 
         @Test
         void when_firstName_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.firstName(null).build());
+            expectBadRequest(createBuilder.firstName(null).build());
         }
 
         @Test
         void when_firstName_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("").build());
+            expectBadRequest(createBuilder.firstName("").build());
         }
 
         @Test
         void when_lastName_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("Name123").build());
+            expectBadRequest(createBuilder.firstName("Name123").build());
         }
 
         @Test
         void when_lastName_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.lastName(null).build());
+            expectBadRequest(createBuilder.lastName(null).build());
         }
 
         @Test
         void when_lastName_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.lastName("").build());
+            expectBadRequest(createBuilder.lastName("").build());
         }
 
         @Test
         void when_dateOfBirth_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.dateOfBirth(null).build());
+            expectBadRequest(createBuilder.dateOfBirth(null).build());
         }
 
         @Test
         void when_dateOfBirth_age_is_lessThan_18() throws Exception {
-            expectBadRequest(dtoBuilder.dateOfBirth(LocalDate.now()).build());
+            expectBadRequest(createBuilder.dateOfBirth(LocalDate.now()).build());
         }
 
         @Test
         void when_gender_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.gender(null).build());
+            expectBadRequest(createBuilder.gender(null).build());
         }
 
         @Test
         void when_gender_value_is_not_allowed() throws Exception {
             // Allowed gender values: Male, Female, Other, Not Specified
-            expectBadRequest(dtoBuilder.gender("Apache Attack Helicopter").build());
+            expectBadRequest(createBuilder.gender("Apache Attack Helicopter").build());
         }
 
         @Test
         void when_email_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.email("invalid@email").build());
+            expectBadRequest(createBuilder.email("invalid@email").build());
         }
 
         @Test
         void when_email_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.email(null).build());
+            expectBadRequest(createBuilder.email(null).build());
         }
 
         @Test
         void when_email_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.email("").build());
+            expectBadRequest(createBuilder.email("").build());
         }
 
         @Test
         void when_phone_is_not_formatted_correctly() throws Exception {
-            expectBadRequest(dtoBuilder.phone("+1233").build());
+            expectBadRequest(createBuilder.phone("+1233").build());
         }
 
         @Test
         void when_phone_is_not_null() throws Exception {
-            expectBadRequest(dtoBuilder.phone(null).build());
+            expectBadRequest(createBuilder.phone(null).build());
         }
 
         @Test
         void when_phone_is_not_blank() throws Exception {
-            expectBadRequest(dtoBuilder.phone("").build());
+            expectBadRequest(createBuilder.phone("").build());
         }
 
         @Test
         void when_socialSecurity_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity("555-5-55555").build());
+            expectBadRequest(createBuilder.socialSecurity("555-5-55555").build());
         }
 
         @Test
         void when_socialSecurity_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity(null).build());
+            expectBadRequest(createBuilder.socialSecurity(null).build());
         }
 
         @Test
         void when_socialSecurity_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity("").build());
+            expectBadRequest(createBuilder.socialSecurity("").build());
         }
 
         @Test
         void when_driversLicense_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.driversLicense(null).build());
+            expectBadRequest(createBuilder.driversLicense(null).build());
         }
 
         @Test
         void when_driversLicense_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.driversLicense("").build());
+            expectBadRequest(createBuilder.driversLicense("").build());
         }
 
         @Test
         void when_income_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.income(null).build());
+            expectBadRequest(createBuilder.income(null).build());
         }
 
         @Test
         void when_income_is_negative() throws Exception {
-            expectBadRequest(dtoBuilder.income(-1).build());
+            expectBadRequest(createBuilder.income(-1).build());
         }
 
         @Test
         void when_address_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.address("123 Address").build());
+            expectBadRequest(createBuilder.address("123 Address").build());
         }
 
         @Test
         void when_address_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.address(null).build());
+            expectBadRequest(createBuilder.address(null).build());
         }
 
         @Test
         void when_address_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.address("").build());
+            expectBadRequest(createBuilder.address("").build());
         }
 
         @Test
         void when_city_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.city(null).build());
+            expectBadRequest(createBuilder.city(null).build());
         }
 
         @Test
         void when_city_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.city("").build());
+            expectBadRequest(createBuilder.city("").build());
         }
 
         @Test
         void when_state_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.state(null).build());
+            expectBadRequest(createBuilder.state(null).build());
         }
 
         @Test
         void when_state_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.state("").build());
+            expectBadRequest(createBuilder.state("").build());
         }
 
         @Test
         void when_zipcode_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode("123-654").build());
+            expectBadRequest(createBuilder.zipcode("123-654").build());
         }
 
         @Test
         void when_zipcode_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode(null).build());
+            expectBadRequest(createBuilder.zipcode(null).build());
         }
 
         @Test
         void when_zipcode_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode("").build());
+            expectBadRequest(createBuilder.zipcode("").build());
         }
 
         @Test
         void when_mailingAddress_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress("123 Address").build());
+            expectBadRequest(createBuilder.mailingAddress("123 Address").build());
         }
 
         @Test
         void when_mailingAddress_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress(null).build());
+            expectBadRequest(createBuilder.mailingAddress(null).build());
         }
 
         @Test
         void when_mailingAddress_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress("").build());
+            expectBadRequest(createBuilder.mailingAddress("").build());
         }
 
         @Test
         void when_mailingCity_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingCity(null).build());
+            expectBadRequest(createBuilder.mailingCity(null).build());
         }
 
         @Test
         void when_mailingCity_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingCity("").build());
+            expectBadRequest(createBuilder.mailingCity("").build());
         }
 
         @Test
         void when_mailingState_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingState(null).build());
+            expectBadRequest(createBuilder.mailingState(null).build());
         }
 
         @Test
         void when_mailingState_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingState("").build());
+            expectBadRequest(createBuilder.mailingState("").build());
         }
 
         @Test
         void when_mailingZipcode_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode("123-654").build());
+            expectBadRequest(createBuilder.mailingZipcode("123-654").build());
         }
 
         @Test
         void when_mailingZipcode_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode(null).build());
+            expectBadRequest(createBuilder.mailingZipcode(null).build());
         }
 
         @Test
         void when_mailingZipcode_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode("").build());
+            expectBadRequest(createBuilder.mailingZipcode("").build());
         }
 
     }

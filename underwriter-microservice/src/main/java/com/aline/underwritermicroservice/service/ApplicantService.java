@@ -1,7 +1,8 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.dto.CreateApplicantDTO;
-import com.aline.core.dto.UpdateApplicantDTO;
+import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.request.UpdateApplicant;
+import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
@@ -10,6 +11,8 @@ import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -24,6 +27,20 @@ public class ApplicantService {
 
     private final ApplicantRepository repository;
 
+    private ModelMapper mapper;
+
+    private ModelMapper skipNullMapper;
+
+    @Autowired
+    public void setMapper(@Qualifier("defaultModelMapper") ModelMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    @Autowired
+    public void setSkipNullMapper(@Qualifier("skipNullModelMapper") ModelMapper mapper) {
+        this.skipNullMapper = mapper;
+    }
+
     /**
      * Creates an applicant entity with validation.
      * <p>
@@ -32,18 +49,18 @@ public class ApplicantService {
      * <p>
      *     <em>A unique entity contains a unique email, phone number, driver's license, Social Security number.</em>
      * </p>
-     * @param createApplicantDTO DTO that contains all of the applicant information.
+     * @param createApplicant DTO that contains all of the applicant information.
      * @return Applicant saved by the {@link ApplicantRepository}
      * @throws ConflictException Thrown from <code>validateUniqueness</code> method.
      */
-    public Applicant createApplicant(@Valid CreateApplicantDTO createApplicantDTO) {
-        ModelMapper mapper = new ModelMapper();
-        Applicant applicant = mapper.map(createApplicantDTO, Applicant.class);
+    public ApplicantResponse createApplicant(@Valid CreateApplicant createApplicant) {
+        Applicant applicant = mapper.map(createApplicant, Applicant.class);
         validateUniqueness(applicant.getEmail(),
                 applicant.getPhone(),
                 applicant.getDriversLicense(),
                 applicant.getSocialSecurity());
-        return repository.save(applicant);
+        Applicant saved = repository.save(applicant);
+        return mapper.map(saved, ApplicantResponse.class);
     }
 
     /**
@@ -52,8 +69,9 @@ public class ApplicantService {
      * @return Applicant with queried ID.
      * @throws ApplicantNotFoundException If applicant with the queried ID does not exist.
      */
-    public Applicant getApplicantById(long id) {
-        return repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
+    public ApplicantResponse getApplicantById(long id) {
+        Applicant found = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
+        return mapper.map(found, ApplicantResponse.class);
     }
 
     /**
@@ -63,16 +81,13 @@ public class ApplicantService {
      * @param newValues The new values to modify the applicant information with.
      *
      */
-    public void updateApplicant(long id, @Valid UpdateApplicantDTO newValues) {
+    public void updateApplicant(long id, @Valid UpdateApplicant newValues) {
         validateUniqueness(newValues.getEmail(),
                 newValues.getPhone(),
                 newValues.getDriversLicense(),
                 newValues.getSocialSecurity());
         Applicant toUpdate = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
-        ModelMapper mapper = new ModelMapper();
-        // Allows for null values in the DTO to not affect the entity
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(newValues, toUpdate);
+        skipNullMapper.map(newValues, toUpdate);
         repository.save(toUpdate);
     }
 
