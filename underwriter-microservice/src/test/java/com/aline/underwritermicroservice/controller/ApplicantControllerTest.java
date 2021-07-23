@@ -200,13 +200,17 @@ class ApplicantControllerTest {
     }
 
     @Test
-    void getApplicants_status_is_ok_and_content_is_populated() throws Exception {
+    @Sql(scripts = "/scripts/search_applicants.sql")
+    void getApplicants_status_is_ok_and_content_is_populated_only_10_elements() throws Exception {
         mock.perform(get("/applicants"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.numberOfElements").value(10))
+                .andExpect(jsonPath("$.totalElements").value(100))
                 .andExpect(jsonPath("$.empty").value(false));
     }
 
