@@ -9,13 +9,19 @@ import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
+import com.aline.underwritermicroservice.util.ApplicantSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * Applicant Service
@@ -23,6 +29,7 @@ import javax.validation.Valid;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "Applicant Service")
 public class ApplicantService {
 
     private final ApplicantRepository repository;
@@ -103,6 +110,13 @@ public class ApplicantService {
         Applicant toDelete = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
         repository.delete(toDelete);
     }
+
+
+    public Page<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
+        ApplicantSpecification spec = new ApplicantSpecification(search);
+        return repository.findAll(spec, pageable).map(applicant -> mapper.map(applicant, ApplicantResponse.class));
+    }
+
 
     /**
      * Validate the uniqueness of an applicant.

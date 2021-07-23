@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -89,7 +91,7 @@ class ApplicantControllerTest {
     /**
      * Shortcut for performing a POST to <code>/applicants</code> and expect a bad request.
      * @param invalidApplicantDTO Modified {@link CreateApplicant} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
-     * @throws Exception thrown from <code>perform</code>.
+     * @throws Exception Thrown by <code>MockMvc::perform</code>.
      */
     private void expectBadRequest(CreateApplicant invalidApplicantDTO) throws Exception {
         String body = mapper.writeValueAsString(invalidApplicantDTO);
@@ -97,6 +99,25 @@ class ApplicantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Search Applicants
+     * <p>
+     *     Shortcut for performing a <code>GET</code> on <code>/applicants</code> with a search parameter.
+     * </p>
+     * <p>
+     *     Expects <code>Status 200 OK</code> and Content-Type <code>application/json</code>.
+     * </p>
+     * @param search Keyword to search for.
+     * @return ResultActions of a <code>MockMvc::perform</code> method.
+     * @throws Exception Thrown by <code>MockMvc::perform</code>.
+     */
+    private ResultActions searchApplicants(String search) throws Exception {
+        return mock.perform(get("/applicants")
+                .param("search", search))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -178,8 +199,119 @@ class ApplicantControllerTest {
                 .andExpect(content().string(new ApplicantNotFoundException().getMessage()));
     }
 
+    @Test
+    void getApplicants_status_is_ok_and_content_is_populated() throws Exception {
+        mock.perform(get("/applicants"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.empty").value(false));
+    }
+
+    @Test
+    void getApplicants_status_is_ok_and_parameters_are_applied() throws Exception {
+        mock.perform(get("/applicants")
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "id,desc"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(2))
+                .andExpect(jsonPath("$.content[1].id").value(1))
+                .andDo(print());
+    }
+
+    @Test
+    void getApplicants_status_is_ok_and_search_params_populate_content_with_filtered_list() throws Exception {
+        mock.perform(get("/applicants")
+                .param("sort", "id,asc")
+                .param("search", "metropolis"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value("3"))
+                .andExpect(jsonPath("$.content[1].id").value("4"));
+    }
+
     /**
-     * Validation tests for CreateApplicantDTO
+     * Test suite for searching for applicants using attribute value based API
+     */
+    @Nested
+    @DisplayName("Applicant Search Tests")
+    @Sql("/scripts/search_applicants.sql")
+    class ApplicantSearchTest {
+
+        @Test
+        void test_searchTerm_is_empty_all_entities_are_shown() throws Exception {
+            searchApplicants("")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(10))
+                    .andExpect(jsonPath("$.totalElements").value(100));
+        }
+
+        @Test
+        void test_singleSearchTerm_allLowerCase_all_matching_values_show() throws Exception {
+            searchApplicants("michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_singleSearchTerm_allUpperCase_all_matching_values_show() throws Exception {
+            searchApplicants("MICHIGAN")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_singleSearchTerm_capitalized_all_matching_values_show() throws Exception {
+            searchApplicants("Michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_allLowerCase_all_matching_values_show() throws Exception {
+            searchApplicants("los angeles michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_allUpperCase_all_matching_values_show() throws Exception {
+            searchApplicants("LOS ANGELES MICHIGAN")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_capitalized_all_matching_values_show() throws Exception {
+            searchApplicants("los angeles michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+    }
+
+    /**
+     * Validation tests for CreateApplicant
      * <p>
      *     <em>Same validation for {@link UpdateApplicant} but fields can be nullable.</em>
      * </p>

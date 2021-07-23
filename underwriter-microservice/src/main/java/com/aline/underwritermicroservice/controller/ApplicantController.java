@@ -11,6 +11,11 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,10 +25,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import javax.websocket.server.PathParam;
 import java.net.URI;
 
 /**
@@ -130,6 +137,30 @@ public class ApplicantController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    /**
+     * Paginated {@link ApplicantResponse} entity.
+     * <p>
+     *     The endpoint returns a paginated object with the content consisting of ApplicantResponse DTOs.
+     * </p>
+     * @param pageable Pageable object that contains the default params for the query.
+     * @return ResponseEntity of type Page with generic ApplicantResponse.
+     */
+    @ApiOperation("Get all Applicants (Paginated)")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Retrieve a populated or empty page of applicants.")
+    })
+    @GetMapping
+    public ResponseEntity<Page<ApplicantResponse>> getApplicants(
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC)
+                Pageable pageable,
+            @RequestParam(defaultValue = "") String search) {
+        Page<ApplicantResponse> applicantResponsePage = service.getApplicants(pageable, search);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(applicantResponsePage);
     }
 
 }
