@@ -31,8 +31,8 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 class ApplicantServiceTest {
 
-    private final long FOUND = 1;
-    private final long NOT_FOUND = 2;
+    private static final long FOUND = 1;
+    private static final long NOT_FOUND = 2;
 
     @Autowired
     ApplicantService service;
