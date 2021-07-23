@@ -1,15 +1,13 @@
 package com.aline.underwritermicroservice.controller;
 
-import com.aline.core.dto.CreateApplicantDTO;
-import com.aline.core.dto.UpdateApplicantDTO;
+import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,19 +16,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,32 +42,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Applicant Controller Integration Test")
 @Slf4j(topic = "Applicant Controller Integration Test")
+@Sql(scripts = "/scripts/applicants.sql")
+@Transactional
 class ApplicantControllerTest {
-
-    @Autowired
-    MockMvc mock;
 
     @Autowired
     ApplicantRepository repository;
 
+    @Autowired
+    MockMvc mock;
+
     /**
      * Object mapper used to map CreateApplicantDTO to a JSON.
      */
-    static ObjectMapper mapper;
+    @Autowired
+    ObjectMapper mapper;
 
     /**
      * CreateApplicantDTOBuilder for modification and reuse.
      */
-    static CreateApplicantDTO.CreateApplicantDTOBuilder dtoBuilder;
+    static CreateApplicant.CreateApplicantBuilder createBuilder;
 
     @BeforeAll
     static void setUpForAll() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.setDateFormat(dateFormat);
-        dtoBuilder = CreateApplicantDTO.builder()
+
+        createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
                 .gender("Male")
@@ -87,88 +84,40 @@ class ApplicantControllerTest {
                 .mailingState("Maine")
                 .mailingZipcode("12345")
                 .income(4500000);
-    }
 
-    @BeforeEach
-    void setUp() {
-        List<Applicant> applicants = Arrays.asList(
-                Applicant.builder()
-                        .id(1L)
-                        .firstName("John")
-                        .lastName("Smith")
-                        .gender("Male")
-                        .dateOfBirth(LocalDate.of(1995, 6, 23))
-                        .email("johnsmith@email.com")
-                        .phone("(222) 222-2222")
-                        .socialSecurity("222-22-2222")
-                        .driversLicense("DL222222")
-                        .address("321 Main St.")
-                        .city("Townsville")
-                        .state("Maine")
-                        .zipcode("12345")
-                        .mailingAddress("PO Box 1234")
-                        .mailingCity("Townsville")
-                        .mailingState("Maine")
-                        .mailingZipcode("12345")
-                        .income(7500000)
-                        .build(),
-
-                Applicant.builder()
-                        .id(2L)
-                        .firstName("Mary")
-                        .lastName("Jane")
-                        .gender("Female")
-                        .dateOfBirth(LocalDate.of(1998, 2, 12))
-                        .email("maryjane@email.com")
-                        .phone("(444) 444-4444")
-                        .socialSecurity("444-44-4444")
-                        .driversLicense("DL444444")
-                        .address("888 County Lane")
-                        .city("Village City")
-                        .state("New Jersey")
-                        .zipcode("54321")
-                        .mailingAddress("888 County Lane")
-                        .mailingCity("Village City")
-                        .mailingState("New Jersey")
-                        .mailingZipcode("54321")
-                        .income(12000000)
-                        .build(),
-
-                Applicant.builder()
-                        .id(3L)
-                        .firstName("Bruce")
-                        .lastName("Wayne")
-                        .gender("Male")
-                        .dateOfBirth(LocalDate.of(1980, 10, 13))
-                        .email("iambatman@email.com")
-                        .phone("(999) 999-9999")
-                        .socialSecurity("999-99-9999")
-                        .driversLicense("BAT99999")
-                        .address("500 Wayne Manor")
-                        .city("Gotham")
-                        .state("Illinois")
-                        .zipcode("99999")
-                        .mailingAddress("PO Box 9999")
-                        .mailingCity("Metropolis")
-                        .mailingState("New York")
-                        .mailingZipcode("54321")
-                        .income(100000000)
-                        .build()
-        );
-        repository.saveAll(applicants);
+        log.info("CreateApplicantDTOBuilder initialized.");
     }
 
     /**
      * Shortcut for performing a POST to <code>/applicants</code> and expect a bad request.
-     * @param invalidApplicantDTO Modified {@link CreateApplicantDTO} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
-     * @throws Exception thrown from <code>perform</code>.
+     * @param invalidApplicantDTO Modified {@link CreateApplicant} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
+     * @throws Exception Thrown by <code>MockMvc::perform</code>.
      */
-    private void expectBadRequest(CreateApplicantDTO invalidApplicantDTO) throws Exception {
+    private void expectBadRequest(CreateApplicant invalidApplicantDTO) throws Exception {
         String body = mapper.writeValueAsString(invalidApplicantDTO);
         mock.perform(post("/applicants")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Search Applicants
+     * <p>
+     *     Shortcut for performing a <code>GET</code> on <code>/applicants</code> with a search parameter.
+     * </p>
+     * <p>
+     *     Expects <code>Status 200 OK</code> and Content-Type <code>application/json</code>.
+     * </p>
+     * @param search Keyword to search for.
+     * @return ResultActions of a <code>MockMvc::perform</code> method.
+     * @throws Exception Thrown by <code>MockMvc::perform</code>.
+     */
+    private ResultActions searchApplicants(String search) throws Exception {
+        return mock.perform(get("/applicants")
+                .param("search", search))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -189,8 +138,8 @@ class ApplicantControllerTest {
     @Test
     void createApplicant_status_is_created_and_location_is_in_header() throws Exception {
 
-        CreateApplicantDTO createApplicantDTO = dtoBuilder.build();
-        String body = mapper.writeValueAsString(createApplicantDTO);
+        CreateApplicant createApplicant = createBuilder.build();
+        String body = mapper.writeValueAsString(createApplicant);
 
         mock.perform(post("/applicants")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -202,13 +151,13 @@ class ApplicantControllerTest {
 
     @Test
     void updateApplicant_status_is_noContent_and_info_successfully_updated() throws Exception {
-        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+        UpdateApplicant updateApplicant = UpdateApplicant.builder()
                 .firstName("Clark")
                 .lastName("Kent").build();
 
         Applicant applicantBeforeUpdate = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
 
-        String body = mapper.writeValueAsString(updateApplicantDTO);
+        String body = mapper.writeValueAsString(updateApplicant);
 
         mock.perform(put("/applicants/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -216,8 +165,8 @@ class ApplicantControllerTest {
                 .andExpect(status().isNoContent());
 
         Applicant updatedApplicant = repository.findById(1L).orElseThrow(ApplicantNotFoundException::new);
-        assertEquals(updateApplicantDTO.getFirstName(), updatedApplicant.getFirstName());
-        assertEquals(updateApplicantDTO.getLastName(), updatedApplicant.getLastName());
+        assertEquals(updateApplicant.getFirstName(), updatedApplicant.getFirstName());
+        assertEquals(updateApplicant.getLastName(), updatedApplicant.getLastName());
 
         // Make sure no other values were updated.
         assertEquals(applicantBeforeUpdate.getEmail(), updatedApplicant.getEmail());
@@ -226,10 +175,10 @@ class ApplicantControllerTest {
     @Test
     void updateApplicant_status_is_notFound_if_applicant_exists() throws Exception {
 
-        UpdateApplicantDTO updateApplicantDTO = UpdateApplicantDTO.builder()
+        UpdateApplicant updateApplicant = UpdateApplicant.builder()
                 .income(100000000).build();
 
-        String body = mapper.writeValueAsString(updateApplicantDTO);
+        String body = mapper.writeValueAsString(updateApplicant);
 
         mock.perform(put("/applicants/99")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -237,10 +186,138 @@ class ApplicantControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void deleteApplicant_status_is_noContent_when_applicant_is_successfully_deleted() throws Exception {
+        mock.perform(delete("/applicants/4"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteApplicant_status_is_notFound_when_applicant_to_delete_does_not_exists() throws Exception {
+        mock.perform(delete("/applicants/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(new ApplicantNotFoundException().getMessage()));
+    }
+
+    @Test
+    @Sql(scripts = "/scripts/search_applicants.sql")
+    void getApplicants_status_is_ok_and_content_is_populated_only_10_elements() throws Exception {
+        mock.perform(get("/applicants"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.numberOfElements").value(10))
+                .andExpect(jsonPath("$.totalElements").value(100))
+                .andExpect(jsonPath("$.empty").value(false));
+    }
+
+    @Test
+    void getApplicants_status_is_ok_and_parameters_are_applied() throws Exception {
+        mock.perform(get("/applicants")
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "id,desc"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(2))
+                .andExpect(jsonPath("$.content[1].id").value(1))
+                .andDo(print());
+    }
+
+    @Test
+    void getApplicants_status_is_ok_and_search_params_populate_content_with_filtered_list() throws Exception {
+        mock.perform(get("/applicants")
+                .param("sort", "id,asc")
+                .param("search", "metropolis"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value("3"))
+                .andExpect(jsonPath("$.content[1].id").value("4"));
+    }
+
     /**
-     * Validation tests for CreateApplicantDTO
+     * Test suite for searching for applicants using attribute value based API
+     */
+    @Nested
+    @DisplayName("Applicant Search Tests")
+    @Sql("/scripts/search_applicants.sql")
+    class ApplicantSearchTest {
+
+        @Test
+        void test_searchTerm_is_empty_all_entities_are_shown() throws Exception {
+            searchApplicants("")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(10))
+                    .andExpect(jsonPath("$.totalElements").value(100));
+        }
+
+        @Test
+        void test_singleSearchTerm_allLowerCase_all_matching_values_show() throws Exception {
+            searchApplicants("michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_singleSearchTerm_allUpperCase_all_matching_values_show() throws Exception {
+            searchApplicants("MICHIGAN")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_singleSearchTerm_capitalized_all_matching_values_show() throws Exception {
+            searchApplicants("Michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(5))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_allLowerCase_all_matching_values_show() throws Exception {
+            searchApplicants("los angeles michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_allUpperCase_all_matching_values_show() throws Exception {
+            searchApplicants("LOS ANGELES MICHIGAN")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+        @Test
+        void test_multipleSearchTerm_capitalized_all_matching_values_show() throws Exception {
+            searchApplicants("los angeles michigan")
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isNotEmpty())
+                    .andExpect(jsonPath("$.content.length()").value(8))
+                    .andDo(print());
+        }
+
+    }
+
+    /**
+     * Validation tests for CreateApplicant
      * <p>
-     *     <em>Same validation for {@link UpdateApplicantDTO} but fields can be nullable.</em>
+     *     <em>Same validation for {@link UpdateApplicant} but fields can be nullable.</em>
      * </p>
      */
     @Nested
@@ -249,219 +326,220 @@ class ApplicantControllerTest {
 
         @Test
         void when_firstName_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("Name123").build());
+            expectBadRequest(createBuilder.firstName("Name123").build());
         }
 
         @Test
         void when_firstName_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.firstName(null).build());
+            expectBadRequest(createBuilder.firstName(null).build());
         }
 
         @Test
         void when_firstName_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("").build());
+            expectBadRequest(createBuilder.firstName("").build());
         }
 
         @Test
         void when_lastName_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.firstName("Name123").build());
+            expectBadRequest(createBuilder.firstName("Name123").build());
         }
 
         @Test
         void when_lastName_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.lastName(null).build());
+            expectBadRequest(createBuilder.lastName(null).build());
         }
 
         @Test
         void when_lastName_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.lastName("").build());
+            expectBadRequest(createBuilder.lastName("").build());
         }
 
         @Test
         void when_dateOfBirth_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.dateOfBirth(null).build());
+            expectBadRequest(createBuilder.dateOfBirth(null).build());
         }
 
         @Test
         void when_dateOfBirth_age_is_lessThan_18() throws Exception {
-            expectBadRequest(dtoBuilder.dateOfBirth(LocalDate.now()).build());
+            expectBadRequest(createBuilder.dateOfBirth(LocalDate.now()).build());
         }
 
         @Test
         void when_gender_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.gender(null).build());
+            expectBadRequest(createBuilder.gender(null).build());
         }
 
         @Test
         void when_gender_value_is_not_allowed() throws Exception {
             // Allowed gender values: Male, Female, Other, Not Specified
-            expectBadRequest(dtoBuilder.gender("InvalidGender").build());
+            expectBadRequest(createBuilder.gender("Apache Attack Helicopter").build());
         }
 
         @Test
         void when_email_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.email("invalid@email").build());
+            expectBadRequest(createBuilder.email("invalid@email").build());
         }
 
         @Test
         void when_email_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.email(null).build());
+            expectBadRequest(createBuilder.email(null).build());
         }
 
         @Test
         void when_email_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.email("").build());
+            expectBadRequest(createBuilder.email("").build());
         }
 
         @Test
         void when_phone_is_not_formatted_correctly() throws Exception {
-            expectBadRequest(dtoBuilder.phone("+1233").build());
+            expectBadRequest(createBuilder.phone("+1233").build());
         }
 
         @Test
         void when_phone_is_not_null() throws Exception {
-            expectBadRequest(dtoBuilder.phone(null).build());
+            expectBadRequest(createBuilder.phone(null).build());
         }
 
         @Test
         void when_phone_is_not_blank() throws Exception {
-            expectBadRequest(dtoBuilder.phone("").build());
+            expectBadRequest(createBuilder.phone("").build());
         }
 
         @Test
         void when_socialSecurity_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity("555-5-55555").build());
+            expectBadRequest(createBuilder.socialSecurity("555-5-55555").build());
         }
 
         @Test
         void when_socialSecurity_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity(null).build());
+            expectBadRequest(createBuilder.socialSecurity(null).build());
         }
 
         @Test
         void when_socialSecurity_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.socialSecurity("").build());
+            expectBadRequest(createBuilder.socialSecurity("").build());
         }
 
         @Test
         void when_driversLicense_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.driversLicense(null).build());
+            expectBadRequest(createBuilder.driversLicense(null).build());
         }
 
         @Test
         void when_driversLicense_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.driversLicense("").build());
+            expectBadRequest(createBuilder.driversLicense("").build());
         }
 
         @Test
         void when_income_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.income(null).build());
+            expectBadRequest(createBuilder.income(null).build());
         }
 
         @Test
         void when_income_is_negative() throws Exception {
-            expectBadRequest(dtoBuilder.income(-1).build());
+            expectBadRequest(createBuilder.income(-1).build());
         }
 
         @Test
         void when_address_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.address("123 Address").build());
+            expectBadRequest(createBuilder.address("123 Address").build());
         }
 
         @Test
         void when_address_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.address(null).build());
+            expectBadRequest(createBuilder.address(null).build());
         }
 
         @Test
         void when_address_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.address("").build());
+            expectBadRequest(createBuilder.address("").build());
         }
 
         @Test
         void when_city_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.city(null).build());
+            expectBadRequest(createBuilder.city(null).build());
         }
 
         @Test
         void when_city_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.city("").build());
+            expectBadRequest(createBuilder.city("").build());
         }
 
         @Test
         void when_state_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.state(null).build());
+            expectBadRequest(createBuilder.state(null).build());
         }
 
         @Test
         void when_state_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.state("").build());
+            expectBadRequest(createBuilder.state("").build());
         }
 
         @Test
         void when_zipcode_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode("123-654").build());
+            expectBadRequest(createBuilder.zipcode("123-654").build());
         }
 
         @Test
         void when_zipcode_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode(null).build());
+            expectBadRequest(createBuilder.zipcode(null).build());
         }
 
         @Test
         void when_zipcode_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.zipcode("").build());
+            expectBadRequest(createBuilder.zipcode("").build());
         }
 
         @Test
         void when_mailingAddress_is_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress("123 Address").build());
+            expectBadRequest(createBuilder.mailingAddress("123 Address").build());
         }
 
         @Test
         void when_mailingAddress_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress(null).build());
+            expectBadRequest(createBuilder.mailingAddress(null).build());
         }
 
         @Test
         void when_mailingAddress_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingAddress("").build());
+            expectBadRequest(createBuilder.mailingAddress("").build());
         }
 
         @Test
         void when_mailingCity_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingCity(null).build());
+            expectBadRequest(createBuilder.mailingCity(null).build());
         }
 
         @Test
         void when_mailingCity_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingCity("").build());
+            expectBadRequest(createBuilder.mailingCity("").build());
         }
 
         @Test
         void when_mailingState_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingState(null).build());
+            expectBadRequest(createBuilder.mailingState(null).build());
         }
 
         @Test
         void when_mailingState_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingState("").build());
+            expectBadRequest(createBuilder.mailingState("").build());
         }
 
         @Test
         void when_mailingZipcode_not_well_formed() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode("123-654").build());
+            expectBadRequest(createBuilder.mailingZipcode("123-654").build());
         }
 
         @Test
         void when_mailingZipcode_is_null() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode(null).build());
+            expectBadRequest(createBuilder.mailingZipcode(null).build());
         }
 
         @Test
         void when_mailingZipcode_is_blank() throws Exception {
-            expectBadRequest(dtoBuilder.mailingZipcode("").build());
+            expectBadRequest(createBuilder.mailingZipcode("").build());
         }
 
     }
+
 }
