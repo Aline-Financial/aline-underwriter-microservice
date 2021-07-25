@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
+import com.aline.core.repository.ApplicationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
