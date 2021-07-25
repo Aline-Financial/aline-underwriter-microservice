@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.dto.response.ApplicationResponse;
+import com.aline.core.model.Application;
 import com.aline.underwritermicroservice.service.ApplicationService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Application Controller
+ * <p>
+ *     CRUD endpoints for {@link Application} entity.
+ * </p>
  */
 @RestController
 @Api("/applications")
