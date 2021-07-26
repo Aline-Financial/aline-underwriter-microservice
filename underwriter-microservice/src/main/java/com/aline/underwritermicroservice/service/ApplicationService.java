@@ -1,12 +1,10 @@
 package com.aline.underwritermicroservice.service;
 
 import com.aline.core.dto.request.ApplyRequest;
-import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.NotFoundException;
 import com.aline.core.exception.conflict.ApplicantConflictException;
-import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -19,11 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-
-import com.aline.core.model.Application.ApplicationBuilder;
-
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
