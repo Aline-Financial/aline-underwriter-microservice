@@ -10,6 +10,7 @@ import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
+import com.aline.core.model.ApplicationStatus;
 import com.aline.core.repository.ApplicationRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ import javax.transaction.Transactional;
 
 import com.aline.core.model.Application.ApplicationBuilder;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,8 +38,13 @@ public class ApplicationService {
 
     private ModelMapper mapper;
     private final ApplicantService applicantService;
-
+    private final UnderwriterService underwriterService;
     private final ApplicationRepository repository;
+
+    @Autowired
+    public void setMapper(@Qualifier("defaultModelMapper") ModelMapper mapper) {
+        this.mapper = mapper;
+    }
 
     /**
      * Get Application By ID
@@ -74,31 +81,37 @@ public class ApplicationService {
     })
     public ApplicationResponse apply(ApplyRequest request) {
 
-        Set<Applicant> applicants;
+        // Create all applicants. (All applicants must be new in this case.)
+        LinkedHashSet<Applicant> applicants;
         try {
             applicants = request.getApplicants()
-                    .stream().map(createApplicant -> applicantService.createApplicant(createApplicant))
+                    .stream().map(applicantService::createApplicant)
                     .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         } catch (ConflictException e) {
             throw new ApplicantConflictException();
         }
 
-        Applicant primaryApplicant = applicants.stream()
-                .findFirst().orElseThrow(() -> new NotFoundException("Primary applicant not found."));
-        ApplicationBuilder builder = Application.builder()
+        // Find the primary applicant (The first one in the linked hash set.)
+        Applicant primaryApplicant = applicants.iterator().next();
+
+        // Build the applicant and set status to pending first.
+        Application application = Application.builder()
                 .applicants(applicants)
                 .applicationType(request.getApplicationType())
-                .primaryApplicant(primaryApplicant);
+                .applicationStatus(ApplicationStatus.PENDING) // Set to pending at first.
+                .primaryApplicant(primaryApplicant)
+                .build();
 
-        Application savedApplication = repository.save(builder.build());
+        // Underwrite the application (Make sure the applicants qualify for
+        // their requested application type.
+        underwriterService.underwriteApplication(application, application::setApplicationStatus);
 
+        // Save the application
+        Application savedApplication = repository.save(application);
+
+        // Return an application response
         return mapper.map(savedApplication, ApplicationResponse.class);
      }
-
-    @Autowired
-    public void setMapper(@Qualifier("defaultModelMapper") ModelMapper mapper) {
-        this.mapper = mapper;
-    }
 
 }

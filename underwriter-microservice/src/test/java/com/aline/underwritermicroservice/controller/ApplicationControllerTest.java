@@ -101,5 +101,42 @@ class ApplicationControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void apply_status_is_conflict_when_an_applicant_already_exists() throws Exception {
+
+        CreateApplicant createApplicant = CreateApplicant.builder()
+                .firstName("Richard")
+                .lastName("Donovan")
+                .email("johnsmith@email.com") // Already exists in DB
+                .phone("(555) 555-5555")
+                .dateOfBirth(LocalDate.of(1990, 8, 9))
+                .gender(Gender.MALE)
+                .socialSecurity("555-55-5555")
+                .driversLicense("ABC123456789")
+                .address("123 Address St")
+                .city("Townsville")
+                .state("Idaho")
+                .zipcode("83202")
+                .mailingAddress("123 Address St")
+                .mailingCity("Townsville")
+                .mailingState("Idaho")
+                .mailingZipcode("83202")
+                .build();
+        LinkedHashSet<CreateApplicant> applicants = new LinkedHashSet<>();
+        applicants.add(createApplicant);
+        ApplyRequest applyRequest = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .applicants(applicants)
+                .build();
+
+        String body = mapper.writeValueAsString(applyRequest);
+
+        mock.perform(post("/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isConflict())
+                .andDo(print());
+    }
+
 
 }
