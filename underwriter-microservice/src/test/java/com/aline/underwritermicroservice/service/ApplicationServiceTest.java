@@ -1,5 +1,8 @@
 package com.aline.underwritermicroservice.service;
 
+import com.aline.core.dto.request.ApplyRequest;
+import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
@@ -7,6 +10,8 @@ import com.aline.core.model.Application;
 import com.aline.core.model.ApplicationStatus;
 import com.aline.core.model.ApplicationType;
 import com.aline.core.repository.ApplicationRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +19,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -32,6 +42,12 @@ public class ApplicationServiceTest {
 
     @Autowired
     ApplicationService service;
+
+    @Autowired
+    ObjectMapper mapper;
+
+    @MockBean
+    ApplicantService applicantService;
 
     @MockBean
     ApplicationRepository repository;
@@ -50,7 +66,7 @@ public class ApplicationServiceTest {
                 .lastName("Smith")
                 .build();
 
-        Set<Applicant> applicants = new HashSet<>();
+        LinkedHashSet<Applicant> applicants = new LinkedHashSet<>();
         applicants.add(primary);
         applicants.add(authorized);
 
@@ -74,8 +90,6 @@ public class ApplicationServiceTest {
         assertEquals(1, response.getId());
         assertEquals(ApplicationStatus.APPROVED.toString(), response.getStatus());
         assertEquals(ApplicationType.CHECKING.toString(), response.getType());
-        assertEquals("John", response.getPrimaryApplicant().getFirstName());
-        assertEquals("Smith", response.getPrimaryApplicant().getLastName());
         assertEquals(2, response.getApplicants().size());
     }
 
@@ -84,6 +98,50 @@ public class ApplicationServiceTest {
         assertThrows(ApplicationNotFoundException.class, () -> service.getApplicationById(NOT_FOUND));
     }
 
+    @Test
+    void deleteApplication_calls_deleteApplication_if_application_exists() {
+        service.deleteApplication(FOUND);
+        verify(repository).delete(any());
+    }
 
+    @Test
+    void deleteApplication_throws_applicationNotFoundException() {
+        assertThrows(ApplicationNotFoundException.class, () -> service.deleteApplication(NOT_FOUND));
+    }
+
+    @Test
+    void apply_returns_creates_applicants_and_returns_the_applicationResponse_with_correct_info() throws Exception {
+        CreateApplicant createApplicant = CreateApplicant.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .email("johnsmith@email.com")
+                .phone("(555) 555-5555")
+                .dateOfBirth(LocalDate.of(1990, 8, 9))
+                .gender("Male")
+                .socialSecurity("555-55-5555")
+                .driversLicense("ABC123456789")
+                .address("123 Address St")
+                .city("Townsville")
+                .state("Idaho")
+                .zipcode("83202")
+                .mailingAddress("123 Address St")
+                .mailingCity("Townsville")
+                .mailingState("Idaho")
+                .mailingZipcode("83202")
+                .build();
+        LinkedHashSet<CreateApplicant> applicants = new LinkedHashSet<>();
+        applicants.add(createApplicant);
+        ApplyRequest applyRequest = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .applicants(applicants)
+                .build();
+
+        // Verify that the applicant service is being called the right amount of times.
+        verify(applicantService, times(applyRequest.getApplicants().size())).createApplicant(any());
+
+        // Verify application is created once.
+        verify(repository, times(1)).save(any());
+
+    }
 
 }
