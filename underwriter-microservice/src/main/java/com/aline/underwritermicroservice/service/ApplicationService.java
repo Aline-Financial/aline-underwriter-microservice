@@ -4,7 +4,9 @@ import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.ConflictException;
+import com.aline.core.exception.NotFoundException;
 import com.aline.core.exception.conflict.ApplicantConflictException;
+import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -16,6 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
+import com.aline.core.model.Application.ApplicationBuilder;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +35,7 @@ import java.util.stream.Collectors;
 public class ApplicationService {
 
     private ModelMapper mapper;
-    private ApplicantService applicantService;
+    private final ApplicantService applicantService;
 
     private final ApplicationRepository repository;
 
@@ -63,29 +68,32 @@ public class ApplicationService {
      * the applicants property first. If the applicants cannot be created for any reason, the process
      * will stop and throw an error.
      */
-    @Transactional(rollbackOn = ApplicantConflictException.class)
+    @Transactional(rollbackOn = {
+            ApplicantConflictException.class,
+            NotFoundException.class
+    })
     public ApplicationResponse apply(ApplyRequest request) {
 
-        // Create all applicants
-        // If not all applicants can be created throw an error.
+        Set<Applicant> applicants;
         try {
-            request.getApplicants().forEach(applicantService::createApplicant);
+            applicants = request.getApplicants()
+                    .stream().map(createApplicant -> applicantService.createApplicant(createApplicant))
+                    .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
+                    .collect(Collectors.toSet());
         } catch (ConflictException e) {
             throw new ApplicantConflictException();
         }
 
-        // If all applicants are created
-        // Create an application with the request type
-        mapper.map(request, Application.class);
+        Applicant primaryApplicant = applicants.stream()
+                .findFirst().orElseThrow(() -> new NotFoundException("Primary applicant not found."));
+        ApplicationBuilder builder = Application.builder()
+                .applicants(applicants)
+                .applicationType(request.getApplicationType())
+                .primaryApplicant(primaryApplicant);
 
-        // Insert the primary applicant by querying PII
-        // Attach the created applicants to the application
-        // Persist the application to the database
+        Application savedApplication = repository.save(builder.build());
 
-        // NOTE: This will all be transactional.
-        // Rollback on any possible exceptions.
-
-        return null;
+        return mapper.map(savedApplication, ApplicationResponse.class);
      }
 
     @Autowired

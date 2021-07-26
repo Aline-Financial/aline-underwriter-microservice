@@ -9,6 +9,7 @@ import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
 import com.aline.core.model.ApplicationStatus;
 import com.aline.core.model.ApplicationType;
+import com.aline.core.model.Gender;
 import com.aline.core.repository.ApplicationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -110,8 +112,27 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    void apply_returns_creates_applicants_and_returns_the_applicationResponse_with_correct_info() throws Exception {
+    void apply_returns_creates_applicants_calls_all_the_correct_methods() throws Exception {
         CreateApplicant createApplicant = CreateApplicant.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .email("johnsmith@email.com")
+                .phone("(555) 555-5555")
+                .dateOfBirth(LocalDate.of(1990, 8, 9))
+                .gender(Gender.MALE)
+                .socialSecurity("555-55-5555")
+                .driversLicense("ABC123456789")
+                .address("123 Address St")
+                .city("Townsville")
+                .state("Idaho")
+                .zipcode("83202")
+                .mailingAddress("123 Address St")
+                .mailingCity("Townsville")
+                .mailingState("Idaho")
+                .mailingZipcode("83202")
+                .build();
+        ApplicantResponse applicantResponse = ApplicantResponse.builder()
+                .id(3L)
                 .firstName("John")
                 .lastName("Smith")
                 .email("johnsmith@email.com")
@@ -128,6 +149,30 @@ public class ApplicationServiceTest {
                 .mailingCity("Townsville")
                 .mailingState("Idaho")
                 .mailingZipcode("83202")
+                .createdAt(LocalDateTime.now())
+                .lastModifiedAt(LocalDateTime.now())
+                .build();
+
+        Applicant applicant = Applicant.builder()
+                .id(3L)
+                .firstName("John")
+                .lastName("Smith")
+                .email("johnsmith@email.com")
+                .phone("(555) 555-5555")
+                .dateOfBirth(LocalDate.of(1990, 8, 9))
+                .gender(Gender.MALE)
+                .socialSecurity("555-55-5555")
+                .driversLicense("ABC123456789")
+                .address("123 Address St")
+                .city("Townsville")
+                .state("Idaho")
+                .zipcode("83202")
+                .mailingAddress("123 Address St")
+                .mailingCity("Townsville")
+                .mailingState("Idaho")
+                .mailingZipcode("83202")
+                .createdAt(LocalDateTime.now())
+                .lastModifiedAt(LocalDateTime.now())
                 .build();
         LinkedHashSet<CreateApplicant> applicants = new LinkedHashSet<>();
         applicants.add(createApplicant);
@@ -135,6 +180,19 @@ public class ApplicationServiceTest {
                 .applicationType(ApplicationType.CHECKING)
                 .applicants(applicants)
                 .build();
+
+        Application application = Application.builder()
+                .id(1L)
+                .primaryApplicant(applicant)
+                .applicants(Collections.singleton(applicant))
+                .applicationType(ApplicationType.CHECKING)
+                .applicationStatus(ApplicationStatus.APPROVED)
+                .build();
+
+        when(applicantService.createApplicant(createApplicant)).thenReturn(applicantResponse);
+        when(repository.save(any())).thenReturn(application);
+
+        service.apply(applyRequest);
 
         // Verify that the applicant service is being called the right amount of times.
         verify(applicantService, times(applyRequest.getApplicants().size())).createApplicant(any());
