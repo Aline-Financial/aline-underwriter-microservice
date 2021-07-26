@@ -138,5 +138,52 @@ class ApplicationControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void apply_status_is_created_when_noApplicants_is_true_and_the_applicantIds_are_provided() throws Exception {
+
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+        ids.add(1L);
+        ids.add(2L);
+        ids.add(3L);
+
+        ApplyRequest request = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .noApplicants(true)
+                .applicantIds(ids)
+                .build();
+
+        String body = mapper.writeValueAsString(request);
+
+        mock.perform(post("/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("location"))
+                .andDo(print());
+    }
+
+    @Test
+    void apply_status_is_notFound_when_noApplicants_is_true_and_the_applicantIds_are_provided_but_one_id_does_not_exists() throws Exception {
+
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+        ids.add(1L);
+        ids.add(2L);
+        ids.add(99L);
+
+        ApplyRequest request = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .noApplicants(true)
+                .applicantIds(ids)
+                .build();
+
+        String body = mapper.writeValueAsString(request);
+
+        mock.perform(post("/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
 
 }

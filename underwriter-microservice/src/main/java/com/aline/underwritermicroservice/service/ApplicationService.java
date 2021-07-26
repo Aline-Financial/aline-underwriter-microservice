@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.service;
 
 import com.aline.core.dto.request.ApplyRequest;
+import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.NotFoundException;
@@ -17,7 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -62,50 +65,77 @@ public class ApplicationService {
     }
 
     /**
-     * Create new application with all brand new applicants.
-     * @param request ApplyRequest dto with all new applicants.
+     * Create new application with all brand new applicants or all existing applicants.
+     * @param request ApplyRequest dto with request information.
      * @return ApplicationResponse containing the newly created applicants and the application status.
      * @apiNote This method will create all of the CreateApplicant dto objects within
      * the applicants property first. If the applicants cannot be created for any reason, the process
-     * will stop and throw an error.
+     * will stop and throw an error. However, if the ApplyRequest is flagged with <code>noApplicants</code>
+     * then it will use a list of ids of existing applicants and it will create an application with those
+     * existing applicants instead. This will allow for a front end to create applicants first to verify
+     * correctness and then apply.
      */
     @Transactional(rollbackOn = {
             ApplicantConflictException.class,
             NotFoundException.class
     })
-    public ApplicationResponse apply(ApplyRequest request) {
+    public ApplicationResponse apply(@Valid ApplyRequest request) {
 
-        // Create all applicants. (All applicants must be new in this case.)
-        LinkedHashSet<Applicant> applicants;
-        try {
-            applicants = request.getApplicants()
-                    .stream().map(applicantService::createApplicant)
+        Application application;
+
+        if (request.getNoApplicants() == null || !request.getNoApplicants()) {
+
+            LinkedHashSet<Applicant> applicants = createApplicants(request.getApplicants());
+            Applicant primaryApplicant = applicants.iterator().next(); // First applicant is the primary
+
+            application = Application.builder()
+                    .primaryApplicant(primaryApplicant)
+                    .applicants(applicants)
+                    .applicationType(request.getApplicationType())
+                    .applicationStatus(ApplicationStatus.PENDING)
+                    .build();
+
+        } else {
+
+            LinkedHashSet<Applicant> applicants = request.getApplicantIds().stream()
+                    .map(applicantService::getApplicantById)
                     .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-        } catch (ConflictException e) {
-            throw new ApplicantConflictException();
+
+            Applicant primaryApplicant = applicants.iterator().next();
+
+            application = Application.builder()
+                    .applicationType(request.getApplicationType())
+                    .applicants(applicants)
+                    .primaryApplicant(primaryApplicant)
+                    .applicationStatus(ApplicationStatus.PENDING)
+                    .build();
         }
 
-        // Find the primary applicant (The first one in the linked hash set.)
-        Applicant primaryApplicant = applicants.iterator().next();
-
-        // Build the applicant and set status to pending first.
-        Application application = Application.builder()
-                .applicants(applicants)
-                .applicationType(request.getApplicationType())
-                .applicationStatus(ApplicationStatus.PENDING) // Set to pending at first.
-                .primaryApplicant(primaryApplicant)
-                .build();
-
-        // Underwrite the application (Make sure the applicants qualify for
-        // their requested application type.
-        underwriterService.underwriteApplication(application, application::setApplicationStatus);
-
-        // Save the application
         Application savedApplication = repository.save(application);
+        ApplicationResponse response = mapper.map(savedApplication, ApplicationResponse.class);
 
-        // Return an application response
-        return mapper.map(savedApplication, ApplicationResponse.class);
-     }
+        underwriterService.underwriteApplication(savedApplication,
+                (status, reason) -> {
+                    savedApplication.setApplicationStatus(status);
+                    response.setStatus(status.name());
+                    response.setReason(reason);
+                });
+
+        return response;
+
+    }
+
+    /**
+     * Create Applicants from a list of applicants
+     * @param createApplicants LinkedHashSet of applicants.
+     * @return LinkedHashSet of saved applicants.
+     */
+    private LinkedHashSet<Applicant> createApplicants(Set<CreateApplicant> createApplicants) {
+        return createApplicants.stream()
+                .map(applicantService::createApplicant)
+                .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
+                .collect(Collectors.toCollection(LinkedHashSet<Applicant>::new));
+    }
 
 }

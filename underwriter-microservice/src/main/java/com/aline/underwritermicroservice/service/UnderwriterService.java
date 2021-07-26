@@ -22,9 +22,9 @@ public class UnderwriterService {
     public void underwriteApplication(Application application, UnderwriterConsumer underwriterConsumer) {
         // TODO: Create underwriting logic and write tests.
         if (!application.getApplicants().isEmpty()) { // As long as there are applicants, we will approve.
-            underwriterConsumer.setStatus(ApplicationStatus.APPROVED);
+            underwriterConsumer.respond(ApplicationStatus.APPROVED, "Application was approved.");
         } else {
-            underwriterConsumer.setStatus(ApplicationStatus.DENIED);
+            underwriterConsumer.respond(ApplicationStatus.DENIED, "Applicant did not exist.");
         }
     }
 
