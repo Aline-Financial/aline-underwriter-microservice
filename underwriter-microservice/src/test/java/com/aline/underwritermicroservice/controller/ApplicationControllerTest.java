@@ -185,5 +185,12 @@ class ApplicationControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void apply_creates_a_member() {
+
+
+
+    }
+
 
 }

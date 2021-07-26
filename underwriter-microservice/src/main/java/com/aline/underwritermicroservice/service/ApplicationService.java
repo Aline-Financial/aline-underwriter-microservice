@@ -120,6 +120,8 @@ public class ApplicationService {
                     savedApplication.setApplicationStatus(status);
                     response.setStatus(status.name());
                     response.setReason(reason);
+
+                    // TODO: Create member and account if status is approved
                 });
 
         return response;
