@@ -5,6 +5,9 @@ import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.model.Application;
 import com.aline.underwritermicroservice.service.ApplicationService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +42,16 @@ public class ApplicationController {
 
     private final ApplicationService service;
 
+    /**
+     * Retrieve an application by it's ID.
+     * @param id The id of the application to be retrieved.
+     * @return ResponseEntity of an ApplicationResponse.
+     */
+    @ApiOperation("Get an application by ID")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Application was found."),
+            @ApiResponse(code = 404, message = "Application does not exist.")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable long id) {
         return ResponseEntity
@@ -47,6 +60,26 @@ public class ApplicationController {
                 .body(service.getApplicationById(id));
     }
 
+    /**
+     * Apply for a membership with this endpoint.
+     * <p>
+     *     The apply request object allows for creation of accounts with
+     *     either existing applicants or new applicants. These are flags
+     *     withing the ApplyRequest dto object.
+     * </p>
+     * @param request The apply request to dto.
+     * @return ResponseEntity of ApplicationResponse with information such as
+     * if the accounts and members were created or if there was a reason for them not
+     * being created.
+     * @see ApplyRequest
+     */
+    @ApiOperation("Apply for a membership.")
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "Application was successfully created and either approved, denied, or set to pending."),
+            @ApiResponse(code = 404, message = "Creating an application with existing applicants and one or more of the existing applicants do not exist."),
+            @ApiResponse(code = 409, message = "There was a conflict with creating one or more of the applicants. There is a conflict with the specified unique columns."),
+            @ApiResponse(code = 400, message = "Application could not be processed for some reason.")
+    })
     @PostMapping
     public ResponseEntity<ApplicationResponse> apply(@RequestBody @Valid ApplyRequest request) {
         ApplicationResponse response = service.apply(request);

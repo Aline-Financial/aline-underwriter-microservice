@@ -11,6 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Member Service
+ * <p>
+ *     Used to create members in the context of
+ *     approving an application.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -23,11 +30,22 @@ public class MemberService {
         this.mapper = mapper;
     }
 
+    /**
+     * Create a member from an applicant.
+     * @param applicant Applicant to attach to the member.
+     * @return Saved member.
+     */
     public Member createMember(Applicant applicant) {
-        Member member = mapper.map(applicant, Member.class);
+        Member member = new Member();
+        member.setApplicant(applicant);
         return repository.save(member);
     }
 
+    /**
+     * Batch call to saving members
+     * @param members Members to be saved.
+     * @return A list of saved members.
+     */
     public List<Member> saveAll(Iterable<Member> members) {
         return repository.saveAll(members);
     }

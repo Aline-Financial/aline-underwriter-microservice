@@ -15,12 +15,26 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Account Service
+ * <p>
+ *     Used to create an account in the context of
+ *     approving an applciation.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
     private final AccountRepository repository;
 
+    /**
+     * Create a single or multiple accounts based on the applicationType
+     * @param applicationType See {@link ApplicationType} to see what kinds of accounts can be created.
+     * @param primaryAccountHolder The primary member.
+     * @param members The members attached to the account including the primary member.
+     * @return A set of accounts that were created.
+     */
     public Set<Account> createAccount(ApplicationType applicationType, Member primaryAccountHolder, Set<Member> members) {
         Set<Account> accounts = new HashSet<>();
         switch (applicationType) {

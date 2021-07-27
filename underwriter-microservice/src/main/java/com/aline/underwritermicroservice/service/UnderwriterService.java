@@ -5,6 +5,10 @@ import com.aline.core.model.ApplicationStatus;
 import com.aline.underwritermicroservice.service.function.UnderwriterConsumer;
 import org.springframework.stereotype.Service;
 
+/**
+ * Underwriter Service
+ * <p>Used to approve or deny applications automatically.</p>
+ */
 @Service
 public class UnderwriterService {
 
