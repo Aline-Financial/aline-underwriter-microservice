@@ -7,7 +7,6 @@ import com.aline.core.model.account.Account;
 import com.aline.core.model.account.CheckingAccount;
 import com.aline.core.model.account.SavingsAccount;
 import com.aline.core.repository.AccountRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ import java.util.Set;
  * Account Service
  * <p>
  *     Used to create an account in the context of
- *     approving an applciation.
+ *     approving an application.
  * </p>
  */
 @Service
