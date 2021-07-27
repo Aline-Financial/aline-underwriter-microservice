@@ -7,6 +7,7 @@ import com.aline.underwritermicroservice.service.ApplicationService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,9 @@ import java.net.URI;
 @Slf4j
 public class ApplicationController {
 
+    @Value("${server.port}")
+    private int PORT;
+
     private final ApplicationService service;
 
     @GetMapping("/{id}")
@@ -50,6 +54,7 @@ public class ApplicationController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
+                .port(PORT)
                 .buildAndExpand(response.getId())
                 .toUri();
 

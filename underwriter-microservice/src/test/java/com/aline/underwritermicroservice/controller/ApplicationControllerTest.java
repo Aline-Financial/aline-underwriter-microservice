@@ -5,6 +5,8 @@ import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.ApplicationType;
 import com.aline.core.model.Gender;
+import com.aline.core.repository.AccountRepository;
+import com.aline.core.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -13,14 +15,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,6 +45,12 @@ class ApplicationControllerTest {
 
     @Autowired
     MockMvc mock;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Autowired
     ObjectMapper mapper;
@@ -64,7 +75,7 @@ class ApplicationControllerTest {
     }
 
     @Test
-    void apply_status_is_created_and_location_is_in_header() throws Exception {
+    void apply_status_is_created_and_location_is_in_header_all_resources_are_created() throws Exception {
 
         CreateApplicant createApplicant = CreateApplicant.builder()
                 .firstName("Richard")
@@ -93,12 +104,25 @@ class ApplicationControllerTest {
 
         String body = mapper.writeValueAsString(applyRequest);
 
-        mock.perform(post("/applications")
+        MvcResult result = mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+
+        String resourceLocation = response.getHeader("location");
+        log.info("Location: {}", resourceLocation);
+
+        assertNotNull(resourceLocation);
+
+        mock.perform(get(resourceLocation))
+                .andExpect(status().isOk());
+
+
     }
 
     @Test
@@ -184,13 +208,4 @@ class ApplicationControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
-
-    @Test
-    void apply_creates_a_member() {
-
-
-
-    }
-
-
 }
