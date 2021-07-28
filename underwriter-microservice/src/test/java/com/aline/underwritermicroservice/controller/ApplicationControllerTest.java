@@ -151,6 +151,7 @@ class ApplicationControllerTest {
         ApplyRequest applyRequest = ApplyRequest.builder()
                 .applicationType(ApplicationType.CHECKING)
                 .applicants(applicants)
+                .noApplicants(false)
                 .build();
 
         String body = mapper.writeValueAsString(applyRequest);
@@ -206,6 +207,36 @@ class ApplicationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    void apply_status_is_badRequest_when_noApplicants_is_true_and_the_applicantIds_are_not_provided() throws Exception {
+        ApplyRequest request = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .noApplicants(true)
+                .build();
+
+        String body = mapper.writeValueAsString(request);
+
+        mock.perform(post("/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+
+        ApplyRequest request2 = ApplyRequest.builder()
+                .applicationType(ApplicationType.CHECKING)
+                .noApplicants(true)
+                .applicantIds(new LinkedHashSet<>())
+                .build();
+
+        String body2 = mapper.writeValueAsString(request2);
+
+        mock.perform(post("/applications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body2))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 }

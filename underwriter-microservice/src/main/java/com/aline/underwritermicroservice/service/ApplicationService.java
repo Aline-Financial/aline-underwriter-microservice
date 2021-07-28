@@ -26,6 +26,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ public class ApplicationService {
     })
     public ApplyResponse apply(@Valid ApplyRequest request, ApplicationResponseConsumer responseConsumer) {
 
-        Application application = null;
+        Application application;
 
         if (request.getNoApplicants() == null || !request.getNoApplicants()) {
 
@@ -111,11 +112,17 @@ public class ApplicationService {
                     .applicationStatus(ApplicationStatus.PENDING)
                     .build();
 
-        } else if (request.getApplicantIds() != null && !request.getApplicantIds().isEmpty()) {
+        } else {
+
+            Set<Long> applicantIds = Optional.ofNullable(request.getApplicantIds())
+                    .orElseThrow(() -> new BadRequestException("Field 'noApplicants' was set to true but no existing applicant ids were provided."));
+
+            if (applicantIds.isEmpty())
+                throw new BadRequestException("Field 'noApplicants' was set to true but field 'applicantIds' is empty.");
 
             log.info("Creating application with existing applicants.");
 
-            LinkedHashSet<Applicant> applicants = request.getApplicantIds().stream()
+            LinkedHashSet<Applicant> applicants = applicantIds.stream()
                     .map(applicantService::getApplicantById)
                     .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -165,9 +172,11 @@ public class ApplicationService {
                             response.setMemberIds(savedMembers.stream().map(Member::getId).collect(Collectors.toSet()));
                         }
                     });
-            if (responseConsumer != null) {
+
+            // Call onRespond if a responseConsumer was provided.
+            if (responseConsumer != null)
                 responseConsumer.onRespond(response);
-            }
+
             return response;
         }
         throw new BadRequestException("Application could not be processed.");
