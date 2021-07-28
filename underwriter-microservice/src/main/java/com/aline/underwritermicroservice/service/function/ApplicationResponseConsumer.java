@@ -1,10 +1,10 @@
 package com.aline.underwritermicroservice.service.function;
 
-import com.aline.core.dto.response.ApplicationResponse;
+import com.aline.core.dto.response.ApplyResponse;
 
 @FunctionalInterface
 public interface ApplicationResponseConsumer {
 
-    void onRespond(ApplicationResponse response);
+    void onRespond(ApplyResponse response);
 
 }

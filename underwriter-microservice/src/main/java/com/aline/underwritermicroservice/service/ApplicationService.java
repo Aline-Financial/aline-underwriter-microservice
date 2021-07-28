@@ -2,7 +2,7 @@ package com.aline.underwritermicroservice.service;
 
 import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.request.CreateApplicant;
-import com.aline.core.dto.response.ApplicationResponse;
+import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.NotFoundException;
@@ -58,9 +58,9 @@ public class ApplicationService {
      * @return ApplicationResponse DTO
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
-    public ApplicationResponse getApplicationById(long id) {
+    public ApplyResponse getApplicationById(long id) {
         Application application = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
-        return mapper.map(application, ApplicationResponse.class);
+        return mapper.map(application, ApplyResponse.class);
     }
 
     /**
@@ -93,7 +93,7 @@ public class ApplicationService {
             NotFoundException.class,
             NullPointerException.class
     })
-    public ApplicationResponse apply(@Valid ApplyRequest request, ApplicationResponseConsumer responseConsumer) {
+    public ApplyResponse apply(@Valid ApplyRequest request, ApplicationResponseConsumer responseConsumer) {
 
         Application application = null;
 
@@ -135,13 +135,13 @@ public class ApplicationService {
             log.info("Create application and application response.");
 
             Application savedApplication = repository.save(application);
-            ApplicationResponse response = mapper.map(savedApplication, ApplicationResponse.class);
+            ApplyResponse response = mapper.map(savedApplication, ApplyResponse.class);
 
             underwriterService.underwriteApplication(savedApplication,
                     (status, reason) -> {
                         log.info("Received underwriting status: {}\nAnd reason: {}", status, reason);
                         savedApplication.setApplicationStatus(status);
-                        response.setStatus(status.name());
+                        response.setStatus(status);
                         response.setReason(reason);
 
                         if (status == ApplicationStatus.APPROVED) {
@@ -182,7 +182,7 @@ public class ApplicationService {
             NotFoundException.class,
             NullPointerException.class
     })
-    public ApplicationResponse apply(@Valid ApplyRequest request) {
+    public ApplyResponse apply(@Valid ApplyRequest request) {
         return apply(request, null);
     }
 

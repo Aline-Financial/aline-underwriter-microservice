@@ -3,6 +3,7 @@ package com.aline.underwritermicroservice.service;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
+import com.aline.core.dto.response.PaginatedResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
@@ -111,9 +112,11 @@ public class ApplicantService {
     }
 
 
-    public Page<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
+    public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
         ApplicantSpecification spec = new ApplicantSpecification(search);
-        return repository.findAll(spec, pageable).map(applicant -> mapper.map(applicant, ApplicantResponse.class));
+        Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
+                .map(applicant -> mapper.map(applicant, ApplicantResponse.class));
+        return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
     }
 
 

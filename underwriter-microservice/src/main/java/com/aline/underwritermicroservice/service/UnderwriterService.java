@@ -24,7 +24,6 @@ public class UnderwriterService {
      * @param underwriterConsumer Function for approving or denying an application.
      */
     public void underwriteApplication(Application application, UnderwriterConsumer underwriterConsumer) {
-        // TODO: Create underwriting logic and write tests.
         if (!application.getApplicants().isEmpty()) { // As long as there are applicants, we will approve.
             underwriterConsumer.respond(ApplicationStatus.APPROVED, "Application was approved.");
         } else {

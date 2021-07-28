@@ -20,7 +20,7 @@ public class ApplicantSpecification implements Specification<Applicant> {
 
     @Override
     public Predicate toPredicate(Root<Applicant> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        String[] searchTerms = search.split("(\\s|,)");
+        String[] searchTerms = search.split("[\\s,]");
 
         Predicate[] predicates = Arrays.stream(searchTerms)
                 .map(String::toLowerCase)

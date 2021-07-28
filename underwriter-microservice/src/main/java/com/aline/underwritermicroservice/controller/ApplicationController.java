@@ -1,7 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.dto.request.ApplyRequest;
-import com.aline.core.dto.response.ApplicationResponse;
+import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.model.Application;
 import com.aline.underwritermicroservice.service.ApplicationService;
 import io.swagger.annotations.Api;
@@ -38,7 +38,7 @@ import java.net.URI;
 public class ApplicationController {
 
     @Value("${server.port}")
-    private int PORT;
+    private int port;
 
     private final ApplicationService service;
 
@@ -53,7 +53,7 @@ public class ApplicationController {
             @ApiResponse(code = 404, message = "Application does not exist.")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable long id) {
+    public ResponseEntity<ApplyResponse> getApplicationById(@PathVariable long id) {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -81,13 +81,13 @@ public class ApplicationController {
             @ApiResponse(code = 400, message = "Application could not be processed for some reason.")
     })
     @PostMapping
-    public ResponseEntity<ApplicationResponse> apply(@RequestBody @Valid ApplyRequest request) {
-        ApplicationResponse response = service.apply(request);
+    public ResponseEntity<ApplyResponse> apply(@RequestBody @Valid ApplyRequest request) {
+        ApplyResponse response = service.apply(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .port(PORT)
+                .port(port)
                 .buildAndExpand(response.getId())
                 .toUri();
 

@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.dto.response.ApplicationResponse;
+import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Slf4j(topic = "Application Service Test")
-public class ApplicationServiceTest {
+class ApplicationServiceTest {
 
     private static final long FOUND = 1;
     private static final long NOT_FOUND = 2;
@@ -78,10 +78,10 @@ public class ApplicationServiceTest {
 
     @Test
     void getApplicationById_returns_applicationResponse_with_correct_info() {
-        ApplicationResponse response = service.getApplicationById(FOUND);
+        ApplyResponse response = service.getApplicationById(FOUND);
         assertEquals(1, response.getId());
-        assertEquals(ApplicationStatus.APPROVED.toString(), response.getStatus());
-        assertEquals(ApplicationType.CHECKING.toString(), response.getType());
+        assertEquals(ApplicationStatus.APPROVED, response.getStatus());
+        assertEquals(ApplicationType.CHECKING, response.getType());
         assertEquals(2, response.getApplicants().size());
     }
 

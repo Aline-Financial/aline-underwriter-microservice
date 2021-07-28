@@ -48,6 +48,8 @@ public class AccountService {
                 accounts.add(createCheckingAccount(primaryAccountHolder, members));
                 accounts.add(createSavingsAccount(primaryAccountHolder, members));
                 break;
+            default:
+                break;
         }
 
         return accounts;

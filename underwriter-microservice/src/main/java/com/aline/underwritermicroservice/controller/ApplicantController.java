@@ -44,7 +44,7 @@ import java.net.URI;
 public class ApplicantController {
 
     @Value("${server.port}")
-    private int PORT;
+    private int port;
 
     private final ApplicantService service;
 
@@ -69,7 +69,7 @@ public class ApplicantController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .port(PORT)
+                .port(port)
                 .buildAndExpand(applicant.getId())
                 .toUri();
         return ResponseEntity
