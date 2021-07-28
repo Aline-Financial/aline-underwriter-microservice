@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <groupId>com.aline</groupId>
-    <artifactId>underwriter-micrservice</artifactId>
+    <artifactId>underwriter-microservice</artifactId>
     <version>0.1.0</version>
     <name>underwriter-microservice</name>
     <description>Underwriter microservice handles member applications and initial account creation while using the bank's main underwriting logic.</description>

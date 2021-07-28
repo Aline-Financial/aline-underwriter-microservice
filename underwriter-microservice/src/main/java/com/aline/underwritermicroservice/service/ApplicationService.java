@@ -2,6 +2,8 @@ package com.aline.underwritermicroservice.service;
 
 import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.response.ApplyAccountResponse;
+import com.aline.core.dto.response.ApplyMemberResponse;
 import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.DiscriminatorValue;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.LinkedHashSet;
@@ -166,10 +169,22 @@ public class ApplicationService {
 
                             List<Member> savedMembers = memberService.saveAll(members);
 
+                            Set<ApplyAccountResponse> createdAccounts = accounts.stream()
+                                            .map(account -> new ApplyAccountResponse(account.getId(),
+                                                    account.getClass().getAnnotation(DiscriminatorValue.class).value()))
+                                            .collect(Collectors.toSet());
+
+                            Set<ApplyMemberResponse> createdMembers = savedMembers.stream()
+                                            .map(member -> new ApplyMemberResponse(member.getId(),
+                                                    String.format("%s %s",
+                                                            member.getApplicant().getFirstName(),
+                                                            member.getApplicant().getLastName())))
+                                                    .collect(Collectors.toSet());
+
                             response.setAccountsCreated(true);
-                            response.setAccountNumbers(accounts.stream().map(Account::getId).collect(Collectors.toSet()));
+                            response.setCreatedAccounts(createdAccounts);
                             response.setMembersCreated(true);
-                            response.setMemberIds(savedMembers.stream().map(Member::getId).collect(Collectors.toSet()));
+                            response.setCreatedMembers(createdMembers);
                         }
                     });
 
