@@ -118,7 +118,7 @@ public class ApplicantService {
      * @param search Search term if any. (Must be at least an empty string)
      * @return PaginatedResponse of Applicants.
      */
-    public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
+    public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull final String search) {
         SearchSpecification<Applicant> spec = new SearchSpecification<>(search);
         Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
                 .map(applicant -> mapper.map(applicant, ApplicantResponse.class));

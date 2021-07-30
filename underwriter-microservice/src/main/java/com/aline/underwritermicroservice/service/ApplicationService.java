@@ -2,9 +2,11 @@ package com.aline.underwritermicroservice.service;
 
 import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.request.CreateApplicant;
+import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.dto.response.ApplyAccountResponse;
 import com.aline.core.dto.response.ApplyMemberResponse;
 import com.aline.core.dto.response.ApplyResponse;
+import com.aline.core.dto.response.PaginatedResponse;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.NotFoundException;
@@ -16,17 +18,21 @@ import com.aline.core.model.ApplicationStatus;
 import com.aline.core.model.Member;
 import com.aline.core.model.account.Account;
 import com.aline.core.repository.ApplicationRepository;
-import com.aline.underwritermicroservice.service.function.ApplicationResponseConsumer;
+import com.aline.core.util.SearchSpecification;
+import com.aline.underwritermicroservice.service.function.ApplyResponseConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.DiscriminatorValue;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -62,9 +68,9 @@ public class ApplicationService {
      * @return ApplicationResponse DTO
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
-    public ApplyResponse getApplicationById(long id) {
+    public ApplicationResponse getApplicationById(long id) {
         Application application = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
-        return mapper.map(application, ApplyResponse.class);
+        return mapper.map(application, ApplicationResponse.class);
     }
 
     /**
@@ -92,12 +98,13 @@ public class ApplicationService {
      * correctness and then apply.
      */
     @Transactional(rollbackOn = {
-            ApplicantConflictException.class,
             ConflictException.class,
             NotFoundException.class,
             NullPointerException.class
     })
-    public ApplyResponse apply(@Valid ApplyRequest request, ApplicationResponseConsumer responseConsumer) {
+    public ApplyResponse apply(@Valid ApplyRequest request, ApplyResponseConsumer responseConsumer) {
+
+        log.info("Starting new application: {}", request.getApplicationType());
 
         Application application;
 
@@ -192,9 +199,24 @@ public class ApplicationService {
             if (responseConsumer != null)
                 responseConsumer.onRespond(response);
 
+            log.info("Accounts and members successfully created.");
             return response;
         }
         throw new BadRequestException("Application could not be processed.");
+    }
+
+    /**
+     * Get paginated application response list.
+     * @param pageable Pageable object passed from controller.
+     * @param search Search term if any. (Must be at least an empty string)
+     * @return PaginatedResponse of Applications.
+     */
+    public PaginatedResponse<ApplicationResponse> getAllApplications(@NotNull   Pageable pageable, @NotNull final String search) {
+        SearchSpecification<Application> spec = new SearchSpecification<>(search);
+        Page<ApplicationResponse> responsePage = repository.findAll(spec, pageable)
+                .map(application -> mapper.map(application, ApplicationResponse.class));
+
+        return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
     }
 
     /**
@@ -216,15 +238,10 @@ public class ApplicationService {
      * @return LinkedHashSet of saved applicants.
      */
     private LinkedHashSet<Applicant> createApplicants(Set<CreateApplicant> createApplicants) {
-        try {
-            return createApplicants.stream()
-                    .map(applicantService::createApplicant)
-                    .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
-                    .collect(Collectors.toCollection(LinkedHashSet<Applicant>::new));
-        } catch (ConflictException e) {
-            log.error(e.getMessage());
-            throw new ApplicantConflictException();
-        }
+        return createApplicants.stream()
+                .map(applicantService::createApplicant)
+                .map(applicantResponse -> mapper.map(applicantResponse, Applicant.class))
+                .collect(Collectors.toCollection(LinkedHashSet<Applicant>::new));
     }
 
 }

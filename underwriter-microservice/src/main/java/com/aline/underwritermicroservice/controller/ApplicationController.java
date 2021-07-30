@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.dto.request.ApplyRequest;
+import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.model.Application;
 import com.aline.underwritermicroservice.service.ApplicationService;
@@ -11,6 +12,10 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -53,11 +59,23 @@ public class ApplicationController {
             @ApiResponse(code = 404, message = "Application does not exist.")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ApplyResponse> getApplicationById(@PathVariable long id) {
+    public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable long id) {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(service.getApplicationById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ApplicationResponse>> getAllApplications(
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC)
+                    Pageable pageable,
+            @RequestParam(defaultValue = "") String search) {
+        Page<ApplicationResponse> page = service.getAllApplications(pageable, search);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(page);
     }
 
     /**

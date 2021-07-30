@@ -24,10 +24,10 @@ public class UnderwriterService {
      * @param underwriterConsumer Function for approving or denying an application.
      */
     public void underwriteApplication(Application application, UnderwriterConsumer underwriterConsumer) {
-        if (!application.getApplicants().isEmpty()) { // As long as there are applicants, we will approve.
+        if (application.getPrimaryApplicant().getIncome() >= 1500000) { // Income must be over or equal to $15,000.00 annually.
             underwriterConsumer.respond(ApplicationStatus.APPROVED, "Application was approved.");
         } else {
-            underwriterConsumer.respond(ApplicationStatus.DENIED, "Applicant did not exist.");
+            underwriterConsumer.respond(ApplicationStatus.DENIED, "Income is not sufficient for approval.");
         }
     }
 

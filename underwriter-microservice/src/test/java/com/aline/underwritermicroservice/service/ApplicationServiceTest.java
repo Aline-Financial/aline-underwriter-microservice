@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.dto.response.ApplyResponse;
+import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -78,10 +78,10 @@ class ApplicationServiceTest {
 
     @Test
     void getApplicationById_returns_applicationResponse_with_correct_info() {
-        ApplyResponse response = service.getApplicationById(FOUND);
+        ApplicationResponse response = service.getApplicationById(FOUND);
         assertEquals(1, response.getId());
-        assertEquals(ApplicationStatus.APPROVED, response.getStatus());
-        assertEquals(ApplicationType.CHECKING, response.getType());
+        assertEquals(ApplicationStatus.APPROVED.name(), response.getApplicationStatus());
+        assertEquals(ApplicationType.CHECKING.name(), response.getApplicationType());
         assertEquals(2, response.getApplicants().size());
     }
 
