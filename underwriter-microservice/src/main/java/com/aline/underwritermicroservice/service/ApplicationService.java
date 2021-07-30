@@ -74,7 +74,7 @@ public class ApplicationService {
      */
     public void deleteApplication(long id) {
         Application toDelete = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
-        repository.delete(toDelete);
+        repository.delete(toDelete); 
     }
 
     /**

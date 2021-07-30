@@ -10,7 +10,7 @@ import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
-import com.aline.underwritermicroservice.util.ApplicantSpecification;
+import com.aline.core.util.SearchSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -112,8 +112,14 @@ public class ApplicantService {
     }
 
 
+    /**
+     * Get paginated applicant response list.
+     * @param pageable Pageable object passed from controller.
+     * @param search Search term if any. (Must be at least an empty string)
+     * @return PaginatedResponse of Applicants.
+     */
     public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
-        ApplicantSpecification spec = new ApplicantSpecification(search);
+        SearchSpecification<Applicant> spec = new SearchSpecification<>(search);
         Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
                 .map(applicant -> mapper.map(applicant, ApplicantResponse.class));
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
