@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,6 +43,9 @@ import java.net.URI;
 @Slf4j(topic = "Applicants")
 public class ApplicantController {
 
+    @Value("${server.port}")
+    private int port;
+
     private final ApplicantService service;
 
     /**
@@ -65,6 +69,7 @@ public class ApplicantController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
+                .port(port)
                 .buildAndExpand(applicant.getId())
                 .toUri();
         return ResponseEntity

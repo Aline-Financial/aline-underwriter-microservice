@@ -3,13 +3,14 @@ package com.aline.underwritermicroservice.service;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
+import com.aline.core.dto.response.PaginatedResponse;
 import com.aline.core.exception.ConflictException;
 import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
-import com.aline.underwritermicroservice.util.ApplicantSpecification;
+import com.aline.core.util.SearchSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -111,9 +112,17 @@ public class ApplicantService {
     }
 
 
-    public Page<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull String search) {
-        ApplicantSpecification spec = new ApplicantSpecification(search);
-        return repository.findAll(spec, pageable).map(applicant -> mapper.map(applicant, ApplicantResponse.class));
+    /**
+     * Get paginated applicant response list.
+     * @param pageable Pageable object passed from controller.
+     * @param search Search term if any. (Must be at least an empty string)
+     * @return PaginatedResponse of Applicants.
+     */
+    public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull final String search) {
+        SearchSpecification<Applicant> spec = new SearchSpecification<>(search);
+        Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
+                .map(applicant -> mapper.map(applicant, ApplicantResponse.class));
+        return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
     }
 
 

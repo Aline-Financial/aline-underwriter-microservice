@@ -4,6 +4,7 @@ import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
+import com.aline.core.model.Gender;
 import com.aline.core.repository.ApplicantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +70,7 @@ class ApplicantControllerTest {
         createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
-                .gender("Male")
+                .gender(Gender.MALE)
                 .dateOfBirth(LocalDate.of(1980, 5, 3))
                 .email("testboy@test.com")
                 .phone("(555) 555-5555")
@@ -367,12 +368,6 @@ class ApplicantControllerTest {
         @Test
         void when_gender_is_null() throws Exception {
             expectBadRequest(createBuilder.gender(null).build());
-        }
-
-        @Test
-        void when_gender_value_is_not_allowed() throws Exception {
-            // Allowed gender values: Male, Female, Other, Not Specified
-            expectBadRequest(createBuilder.gender("Apache Attack Helicopter").build());
         }
 
         @Test

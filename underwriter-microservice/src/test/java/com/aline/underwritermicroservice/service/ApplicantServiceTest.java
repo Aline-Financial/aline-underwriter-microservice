@@ -8,12 +8,14 @@ import com.aline.core.exception.conflict.EmailConflictException;
 import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
+import com.aline.core.model.Gender;
 import com.aline.core.repository.ApplicantRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 @SpringBootTest
 class ApplicantServiceTest {
 
@@ -55,7 +58,7 @@ class ApplicantServiceTest {
         createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
-                .gender("Male")
+                .gender(Gender.MALE)
                 .dateOfBirth(LocalDate.of(1980, 5, 3))
                 .email("testboy@test.com")
                 .phone("(555) 555-5555")
@@ -77,7 +80,7 @@ class ApplicantServiceTest {
                 .id(1L)
                 .firstName("Test")
                 .lastName("Boy")
-                .gender("Male")
+                .gender(Gender.MALE)
                 .dateOfBirth(LocalDate.of(1980, 5, 3))
                 .email("testboy@test.com")
                 .phone("(555) 555-5555")
