@@ -18,3 +18,7 @@ spring:
   jackson:
     serialization:
       INDENT_OUTPUT: true
+
+application:
+  crypto:
+    secret-key: "MyHaylieRoseSophieAlyson"
