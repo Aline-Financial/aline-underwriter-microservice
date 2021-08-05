@@ -21,4 +21,4 @@ spring:
 
 application:
   crypto:
-    secret-key: "MyHaylieRoseSophieAlyson"
+    secret-key: "test-secret-key!"
