@@ -6,6 +6,8 @@ import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
 import com.aline.core.model.ApplicationStatus;
 import com.aline.core.model.ApplicationType;
+import com.aline.core.model.Bank;
+import com.aline.core.model.Branch;
 import com.aline.core.repository.ApplicationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,9 @@ class ApplicationServiceTest {
     ApplicantService applicantService;
 
     @MockBean
+    MemberService memberService;
+
+    @MockBean
     ApplicationRepository repository;
 
     @BeforeEach
@@ -74,8 +79,14 @@ class ApplicationServiceTest {
         primary.setApplications(Collections.singleton(application));
         primary.setApplications(Collections.singleton(application));
 
+        Bank bank = new Bank();
+        Branch branch = new Branch();
+        branch.setId(1L);
+        branch.setBank(bank);
+
         when(repository.findById(FOUND)).thenReturn(Optional.of(application));
         when(repository.findById(NOT_FOUND)).thenReturn(Optional.empty());
+        when(memberService.getBranch(any())).thenReturn(branch);
     }
 
     @Test

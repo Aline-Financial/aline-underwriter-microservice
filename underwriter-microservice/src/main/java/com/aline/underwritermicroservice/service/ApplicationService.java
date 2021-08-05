@@ -182,7 +182,7 @@ public class ApplicationService {
                                             .collect(Collectors.toSet());
 
                             Set<ApplyMemberResponse> createdMembers = savedMembers.stream()
-                                            .map(member -> new ApplyMemberResponse(member.getId(),
+                                            .map(member -> new ApplyMemberResponse(member.getMembershipId(),
                                                     String.format("%s %s",
                                                             member.getApplicant().getFirstName(),
                                                             member.getApplicant().getLastName())))

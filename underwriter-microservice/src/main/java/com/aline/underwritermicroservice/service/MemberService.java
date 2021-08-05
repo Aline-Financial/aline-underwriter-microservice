@@ -1,14 +1,20 @@
 package com.aline.underwritermicroservice.service;
 
+import com.aline.core.exception.BadRequestException;
+import com.aline.core.exception.NotFoundException;
 import com.aline.core.model.Applicant;
+import com.aline.core.model.Branch;
 import com.aline.core.model.Member;
 import com.aline.core.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -20,25 +26,33 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "Member Service")
 public class MemberService {
 
     private final MemberRepository repository;
-    private ModelMapper mapper;
-
-    @Autowired
-    public void setMapper(@Qualifier("defaultModelMapper") ModelMapper mapper) {
-        this.mapper = mapper;
-    }
+    private final BranchService branchService;
 
     /**
      * Create a member from an applicant.
      * @param applicant Applicant to attach to the member.
      * @return Saved member.
      */
+    @Transactional(rollbackOn = {NotFoundException.class, BadRequestException.class})
     public Member createMember(Applicant applicant) {
         Member member = new Member();
         member.setApplicant(applicant);
+        member.setBranch(getBranch(applicant));
         return repository.save(member);
+    }
+
+    /**
+     * Used to find a branch by the applicant's address.
+     * @param applicant Applicant to assign branch to.
+     * @return A branch closest to the applicant.
+     */
+    public Branch getBranch(Applicant applicant) {
+        log.info("(To be implemented) Finding branch closest to applicant's zipcode: {}", applicant.getZipcode());
+        return branchService.getBranchById(1);
     }
 
     /**
