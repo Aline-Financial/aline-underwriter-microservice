@@ -8,13 +8,10 @@ import com.aline.core.model.Member;
 import com.aline.core.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -42,6 +39,10 @@ public class MemberService {
         Member member = new Member();
         member.setApplicant(applicant);
         member.setBranch(getBranch(applicant));
+        return saveMember(member);
+    }
+
+    public Member saveMember(@Valid Member member) {
         return repository.save(member);
     }
 

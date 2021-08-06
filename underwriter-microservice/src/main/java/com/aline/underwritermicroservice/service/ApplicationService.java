@@ -177,7 +177,7 @@ public class ApplicationService {
                             List<Member> savedMembers = memberService.saveAll(members);
 
                             Set<ApplyAccountResponse> createdAccounts = accounts.stream()
-                                            .map(account -> new ApplyAccountResponse(account.getId(),
+                                            .map(account -> new ApplyAccountResponse(account.getAccountNumber(),
                                                     account.getClass().getAnnotation(DiscriminatorValue.class).value()))
                                             .collect(Collectors.toSet());
 

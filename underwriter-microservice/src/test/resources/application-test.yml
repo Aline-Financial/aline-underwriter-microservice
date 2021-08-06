@@ -6,8 +6,7 @@ spring:
     name: "underwriter-microservice"
   jpa:
     hibernate:
-      ddl-auto: create
-
+      ddl-auto: create-drop
     show-sql: true
     database-platform: "org.hibernate.dialect.H2Dialect"
   datasource:
@@ -15,6 +14,7 @@ spring:
     password: ""
     url: "jdbc:h2:mem:testdb"
     driver-class-name: org.h2.Driver
+    initialization-mode: embedded
   jackson:
     serialization:
       INDENT_OUTPUT: true
