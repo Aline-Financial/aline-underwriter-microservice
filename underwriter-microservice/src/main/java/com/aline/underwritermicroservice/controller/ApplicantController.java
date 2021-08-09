@@ -36,7 +36,7 @@ import java.net.URI;
  * Applicant Controller
  * <p>CRUD endpoints for {@link Applicant} entity.</p>
  */
-@Tag(name = "/applicants")
+@Tag(name = "Applicants")
 @RestController
 @RequestMapping("/applicants")
 @RequiredArgsConstructor
