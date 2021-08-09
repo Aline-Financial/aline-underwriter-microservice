@@ -5,10 +5,10 @@ import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.model.Application;
 import com.aline.underwritermicroservice.service.ApplicationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,7 @@ import java.net.URI;
  * </p>
  */
 @RestController
-@Api("/applications")
+@Tag(name = "Applications")
 @RequestMapping("/applications")
 @RequiredArgsConstructor
 @Slf4j
@@ -53,10 +53,10 @@ public class ApplicationController {
      * @param id The id of the application to be retrieved.
      * @return ResponseEntity of an ApplicationResponse.
      */
-    @ApiOperation("Get an application by ID")
+    @Operation(description = "Get an application by ID")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Application was found."),
-            @ApiResponse(code = 404, message = "Application does not exist.")
+            @ApiResponse(responseCode = "200", description = "Application was found."),
+            @ApiResponse(responseCode = "404", description = "Application does not exist.")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable long id) {
@@ -91,12 +91,12 @@ public class ApplicationController {
      * being created.
      * @see ApplyRequest
      */
-    @ApiOperation("Apply for a membership.")
+    @Operation(description = "Apply for a membership.")
     @ApiResponses({
-            @ApiResponse(code = 201, message = "Application was successfully created and either approved, denied, or set to pending."),
-            @ApiResponse(code = 404, message = "Creating an application with existing applicants and one or more of the existing applicants do not exist."),
-            @ApiResponse(code = 409, message = "There was a conflict with creating one or more of the applicants. There is a conflict with the specified unique columns."),
-            @ApiResponse(code = 400, message = "Application could not be processed for some reason.")
+            @ApiResponse(responseCode = "201", description = "Application was successfully created and either approved, denied, or set to pending."),
+            @ApiResponse(responseCode = "404", description = "Creating an application with existing applicants and one or more of the existing applicants do not exist."),
+            @ApiResponse(responseCode = "409", description = "There was a conflict with creating one or more of the applicants. There is a conflict with the specified unique columns."),
+            @ApiResponse(responseCode = "400", description = "Application could not be processed for some reason.")
     })
     @PostMapping
     public ResponseEntity<ApplyResponse> apply(@RequestBody @Valid ApplyRequest request) {
