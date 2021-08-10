@@ -1,8 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "application.crypto.secret-key",
-      "type": "java.lang.String",
-      "description": "Secret key for encryption."
-    }
-  ] }

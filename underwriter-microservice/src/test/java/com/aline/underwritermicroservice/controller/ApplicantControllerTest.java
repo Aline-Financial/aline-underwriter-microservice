@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 
 import javax.transaction.Transactional;
@@ -66,7 +67,6 @@ class ApplicantControllerTest {
 
     @BeforeAll
     static void setUpForAll() {
-
         createBuilder = CreateApplicant.builder()
                 .firstName("Test")
                 .lastName("Boy")
@@ -92,7 +92,7 @@ class ApplicantControllerTest {
     /**
      * Shortcut for performing a POST to <code>/applicants</code> and expect a bad request.
      * @param invalidApplicantDTO Modified {@link CreateApplicant} to be invalid. {@link ObjectMapper} <code>mapper</code> will convert this into a JSON object.
-     * @throws Exception Thrown by <code>MockMvc::perform</code>.
+     * @throws Exception Thrown by <code>{@link MockMvc#perform(RequestBuilder)}</code>.
      */
     private void expectBadRequest(CreateApplicant invalidApplicantDTO) throws Exception {
         String body = mapper.writeValueAsString(invalidApplicantDTO);
@@ -111,8 +111,8 @@ class ApplicantControllerTest {
      *     Expects <code>Status 200 OK</code> and Content-Type <code>application/json</code>.
      * </p>
      * @param search Keyword to search for.
-     * @return ResultActions of a <code>MockMvc::perform</code> method.
-     * @throws Exception Thrown by <code>MockMvc::perform</code>.
+     * @return ResultActions of a <code>{@link MockMvc#perform(RequestBuilder)}</code> method.
+     * @throws Exception Thrown by <code>{@link MockMvc#perform(RequestBuilder)}</code>.
      */
     private ResultActions searchApplicants(String search) throws Exception {
         return mock.perform(get("/applicants")
