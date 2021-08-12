@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Tag(name = "Root Controller")
 public class RootController {
-
     @GetMapping("/health")
     @Operation(description = "Health check endpoint")
     @ApiResponses({
@@ -25,5 +24,4 @@ public class RootController {
     public ResponseEntity<Void> healthCheck() {
         return ResponseEntity.ok().build();
     }
-
 }
