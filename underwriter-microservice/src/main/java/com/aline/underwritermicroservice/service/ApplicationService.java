@@ -181,12 +181,12 @@ public class ApplicationService {
                                                     account.getClass().getAnnotation(DiscriminatorValue.class).value()))
                                             .collect(Collectors.toSet());
 
-                            Set<ApplyMemberResponse> createdMembers = savedMembers.stream()
+                            List<ApplyMemberResponse> createdMembers = savedMembers.stream()
                                             .map(member -> new ApplyMemberResponse(member.getMembershipId(),
                                                     String.format("%s %s",
                                                             member.getApplicant().getFirstName(),
                                                             member.getApplicant().getLastName())))
-                                                    .collect(Collectors.toSet());
+                                                    .collect(Collectors.toList());
 
                             response.setAccountsCreated(true);
                             response.setCreatedAccounts(createdAccounts);
