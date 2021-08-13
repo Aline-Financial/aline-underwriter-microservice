@@ -22,7 +22,3 @@ spring:
 app:
   security:
     secret-key: "ThisIsAGreatSecretKey!!!"
-
-logging:
-  level:
-    root: error

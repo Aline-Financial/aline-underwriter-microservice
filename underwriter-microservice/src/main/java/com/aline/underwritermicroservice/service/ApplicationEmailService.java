@@ -42,7 +42,7 @@ public class ApplicationEmailService {
         variables.put("landingPortalUrl", landingPortalUrl);
         variables.put("memberDashboardUrl", memberDashboardUrl);
 
-        emailService.sendHtmlEmail("Welcome to Aline Financial", "templates/apply-approved-notification.html", email, variables);
+        emailService.sendHtmlEmail("Welcome to Aline Financial", "application/approved-notification", email, variables);
 
     }
 
