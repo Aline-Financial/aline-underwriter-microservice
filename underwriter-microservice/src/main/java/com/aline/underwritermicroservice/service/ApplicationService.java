@@ -55,6 +55,7 @@ public class ApplicationService {
     private final UnderwriterService underwriterService;
     private final MemberService memberService;
     private final AccountService accountService;
+    private final ApplicationEmailService emailService;
     private final ApplicationRepository repository;
 
     @Autowired
@@ -177,16 +178,16 @@ public class ApplicationService {
                             List<Member> savedMembers = memberService.saveAll(members);
 
                             Set<ApplyAccountResponse> createdAccounts = accounts.stream()
-                                            .map(account -> new ApplyAccountResponse(account.getId(),
+                                            .map(account -> new ApplyAccountResponse(account.getAccountNumber(),
                                                     account.getClass().getAnnotation(DiscriminatorValue.class).value()))
                                             .collect(Collectors.toSet());
 
-                            Set<ApplyMemberResponse> createdMembers = savedMembers.stream()
-                                            .map(member -> new ApplyMemberResponse(member.getId(),
+                            List<ApplyMemberResponse> createdMembers = savedMembers.stream()
+                                            .map(member -> new ApplyMemberResponse(member.getMembershipId(),
                                                     String.format("%s %s",
                                                             member.getApplicant().getFirstName(),
                                                             member.getApplicant().getLastName())))
-                                                    .collect(Collectors.toSet());
+                                                    .collect(Collectors.toList());
 
                             response.setAccountsCreated(true);
                             response.setCreatedAccounts(createdAccounts);
@@ -217,6 +218,15 @@ public class ApplicationService {
                 .map(application -> mapper.map(application, ApplicationResponse.class));
 
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
+    }
+
+    /**
+     * Send an email based on the application response status.
+     * @param request The ApplyRequest DTO
+     * @return An ApplyResponse object.
+     */
+    public ApplyResponse applyAndSendEmail(ApplyRequest request) {
+        return apply(request, emailService::sendEmailBasedOnStatus);
     }
 
     /**

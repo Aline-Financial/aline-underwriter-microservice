@@ -7,13 +7,16 @@ import com.aline.core.model.ApplicationType;
 import com.aline.core.model.Gender;
 import com.aline.core.repository.AccountRepository;
 import com.aline.core.repository.MemberRepository;
+import com.aline.underwritermicroservice.service.ApplicationEmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,6 +29,8 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,14 +60,22 @@ class ApplicationControllerTest {
     @Autowired
     ObjectMapper mapper;
 
+    @MockBean
+    ApplicationEmailService emailService;
+
+    @BeforeEach
+    void setUp() {
+        // Prevent an HBO Max and don't send emails during integration tests.
+        doNothing().when(emailService).sendEmailBasedOnStatus(any());
+    }
+
     @Test
     void getApplicationById_status_is_ok_applicationId_is_equalTo_pathVariable() throws Exception {
         int applicationId = 1;
         mock.perform(get("/applications/{id}", applicationId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(applicationId))
-                .andDo(print());
+                .andExpect(jsonPath("$.id").value(applicationId));
 
     }
 
@@ -88,6 +101,7 @@ class ApplicationControllerTest {
                 .driversLicense("ABC123456789")
                 .address("123 Address St")
                 .city("Townsville")
+                .income(4500000)
                 .state("Idaho")
                 .zipcode("83202")
                 .mailingAddress("123 Address St")
@@ -109,7 +123,6 @@ class ApplicationControllerTest {
                 .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
-                .andDo(print())
                 .andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -159,8 +172,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isConflict())
-                .andDo(print());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -183,8 +195,7 @@ class ApplicationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("location"))
-                .andDo(print());
+                .andExpect(header().exists("location"));
     }
 
     @Test
@@ -206,8 +217,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isNotFound())
-                .andDo(print());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -222,8 +232,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                .andExpect(status().isBadRequest());
 
         ApplyRequest request2 = ApplyRequest.builder()
                 .applicationType(ApplicationType.CHECKING)
@@ -236,7 +245,6 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body2))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                .andExpect(status().isBadRequest());
     }
 }

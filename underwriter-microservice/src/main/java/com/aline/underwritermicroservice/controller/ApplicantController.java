@@ -5,10 +5,10 @@ import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.model.Applicant;
 import com.aline.underwritermicroservice.service.ApplicantService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,7 @@ import java.net.URI;
  * Applicant Controller
  * <p>CRUD endpoints for {@link Applicant} entity.</p>
  */
-@Api(value = "/applicants")
+@Tag(name = "Applicants")
 @RestController
 @RequestMapping("/applicants")
 @RequiredArgsConstructor
@@ -57,11 +57,11 @@ public class ApplicantController {
      * @return ResponseEntity with location to the created resource.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @ApiOperation("Create an Applicant")
+    @Operation(description = "Create an Applicant")
     @ApiResponses({
-            @ApiResponse(code = 201, message = "Applicant successfully created."),
-            @ApiResponse(code = 404, message = "Applicant data is not valid. (Bad request)"),
-            @ApiResponse(code = 409, message = "Applicant data conflicts with other applicant data.")
+            @ApiResponse(responseCode = "201", description = "Applicant successfully created."),
+            @ApiResponse(responseCode = "404", description = "Applicant data is not valid. (Bad request)"),
+            @ApiResponse(responseCode = "409", description = "Applicant data conflicts with other applicant data.")
     })
     @PostMapping
     public ResponseEntity<ApplicantResponse> createApplicant(@RequestBody @Valid CreateApplicant createApplicant) {
@@ -87,10 +87,10 @@ public class ApplicantController {
      * @return ResponseEntity of the queried applicant if one exists.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @ApiOperation("Get Applicant by ID")
+    @Operation(description = "Get Applicant by ID")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Applicant was found."),
-            @ApiResponse(code = 404, message = "Applicant does not exist.")
+            @ApiResponse(responseCode = "200", description = "Applicant was found."),
+            @ApiResponse(responseCode = "404", description = "Applicant does not exist.")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApplicantResponse> getApplicantById(@PathVariable long id) {
@@ -108,11 +108,11 @@ public class ApplicantController {
      * @return ResponseEntity with status <code>204 NO CONTENT</code> if update was successful.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @ApiOperation("Update an Applicant by ID")
+    @Operation(description = "Update an Applicant by ID")
     @ApiResponses({
-            @ApiResponse(code = 204, message = "Applicant was successfully updated."),
-            @ApiResponse(code = 400, message = "New values were not valid."),
-            @ApiResponse(code = 404, message = "Applicant to update was not found.")
+            @ApiResponse(responseCode = "204", description = "Applicant was successfully updated."),
+            @ApiResponse(responseCode = "400", description = "New values were not valid."),
+            @ApiResponse(responseCode = "404", description = "Applicant to update was not found.")
     })
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateApplicant(@PathVariable long id, @RequestBody @Valid UpdateApplicant newValues) {
@@ -129,10 +129,10 @@ public class ApplicantController {
      * @return ResponseEntity with status <code>204 NO CONTENT</code> if applicant was deleted successfully.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @ApiOperation("Delete an Applicant by ID")
+    @Operation(description = "Delete an Applicant by ID")
     @ApiResponses({
-            @ApiResponse(code = 204, message = "Applicant was successfully deleted."),
-            @ApiResponse(code = 404, message = "Applicant to delete was not found.")
+            @ApiResponse(responseCode = "204", description = "Applicant was successfully deleted."),
+            @ApiResponse(responseCode = "404", description = "Applicant to delete was not found.")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteApplicant(@PathVariable long id) {
@@ -150,9 +150,9 @@ public class ApplicantController {
      * @param pageable Pageable object that contains the default params for the query.
      * @return ResponseEntity of type Page with generic ApplicantResponse.
      */
-    @ApiOperation("Get all Applicants (Paginated)")
+    @Operation(description = "Get all Applicants (Paginated)")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Retrieve a populated or empty page of applicants.")
+            @ApiResponse(responseCode = "200", description = "Retrieve a populated or empty page of applicants.")
     })
     @GetMapping
     public ResponseEntity<Page<ApplicantResponse>> getApplicants(

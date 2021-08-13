@@ -6,15 +6,24 @@ spring:
     name: "underwriter-microservice"
   jpa:
     hibernate:
-      ddl-auto: create
-
-    show-sql: true
+      ddl-auto: create-drop
     database-platform: "org.hibernate.dialect.H2Dialect"
   datasource:
     username: "sa"
     password: ""
     url: "jdbc:h2:mem:testdb"
     driver-class-name: org.h2.Driver
+    initialization-mode: embedded
   jackson:
     serialization:
       INDENT_OUTPUT: true
+
+app:
+  security:
+    secret-key: "ThisIsAGreatSecretKey!!!"
+  email:
+    enable: true
+
+logging:
+  level:
+    root: error
