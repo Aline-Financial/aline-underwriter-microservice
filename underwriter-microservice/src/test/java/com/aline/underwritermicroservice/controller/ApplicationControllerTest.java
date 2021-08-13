@@ -66,7 +66,7 @@ class ApplicationControllerTest {
     @BeforeEach
     void setUp() {
         // Prevent an HBO Max and don't send emails during integration tests.
-        doNothing().when(emailService).sendApprovalEmail(any());
+        doNothing().when(emailService).sendEmailBasedOnStatus(any());
     }
 
     @Test

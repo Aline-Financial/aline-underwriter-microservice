@@ -220,20 +220,13 @@ public class ApplicationService {
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
     }
 
+    /**
+     * Send an email based on the application response status.
+     * @param request The ApplyRequest DTO
+     * @return An ApplyResponse object.
+     */
     public ApplyResponse applyAndSendEmail(ApplyRequest request) {
-        return apply(request, response -> {
-            switch (response.getStatus()) {
-                case APPROVED:
-                    emailService.sendApprovalEmail(response);
-                    break;
-                case PENDING:
-                    emailService.sendPendingEmail(response);
-                    break;
-                case DENIED:
-                    emailService.sendDenialEmail(response);
-                    break;
-            }
-        });
+        return apply(request, emailService::sendEmailBasedOnStatus);
     }
 
     /**

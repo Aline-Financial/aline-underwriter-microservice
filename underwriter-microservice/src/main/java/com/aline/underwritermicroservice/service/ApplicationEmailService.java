@@ -4,6 +4,7 @@ import com.aline.core.aws.email.EmailService;
 import com.aline.core.config.AppConfig;
 import com.aline.core.dto.response.ApplicantResponse;
 import com.aline.core.dto.response.ApplyResponse;
+import com.aline.core.model.ApplicationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -86,6 +87,24 @@ public class ApplicationEmailService {
 
     private ApplicantResponse getPrimaryApplicantResponse(ApplyResponse response) {
         return response.getApplicants().get(0);
+    }
+
+    /**
+     * Send an email based on the application status
+     * @param response The application response that contains the status
+     */
+    public void sendEmailBasedOnStatus(ApplyResponse response) {
+        switch (response.getStatus()) {
+            case APPROVED:
+                sendApprovalEmail(response);
+                break;
+            case PENDING:
+                sendPendingEmail(response);
+                break;
+            case DENIED:
+                sendDenialEmail(response);
+                break;
+        }
     }
 
 }

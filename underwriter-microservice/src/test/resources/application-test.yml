@@ -7,7 +7,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
     database-platform: "org.hibernate.dialect.H2Dialect"
   datasource:
     username: "sa"
@@ -22,6 +21,8 @@ spring:
 app:
   security:
     secret-key: "ThisIsAGreatSecretKey!!!"
+  email:
+    enable: true
 
 logging:
   level:
