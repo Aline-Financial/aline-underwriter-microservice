@@ -7,13 +7,16 @@ import com.aline.core.model.ApplicationType;
 import com.aline.core.model.Gender;
 import com.aline.core.repository.AccountRepository;
 import com.aline.core.repository.MemberRepository;
+import com.aline.underwritermicroservice.service.ApplicationEmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,6 +29,8 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,6 +59,15 @@ class ApplicationControllerTest {
 
     @Autowired
     ObjectMapper mapper;
+
+    @MockBean
+    ApplicationEmailService emailService;
+
+    @BeforeEach
+    void setUp() {
+        // Prevent an HBO Max and don't send emails during integration tests.
+        doNothing().when(emailService).sendApprovalEmail(any());
+    }
 
     @Test
     void getApplicationById_status_is_ok_applicationId_is_equalTo_pathVariable() throws Exception {

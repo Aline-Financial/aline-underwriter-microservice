@@ -19,5 +19,10 @@ spring:
     serialization:
       INDENT_OUTPUT: true
 
-application:
-  secret-key: "ThisIsAGreatSecretKey!!!"
+app:
+  security:
+    secret-key: "ThisIsAGreatSecretKey!!!"
+
+logging:
+  level:
+    root: error
