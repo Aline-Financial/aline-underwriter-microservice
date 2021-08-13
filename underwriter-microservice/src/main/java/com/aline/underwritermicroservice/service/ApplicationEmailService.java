@@ -24,8 +24,7 @@ public class ApplicationEmailService {
     private final AppConfig appConfig;
 
     /**
-     * Send an approval email using the application-approved-template.html
-     * file in the resources of this project.
+     * Send an approval email to the primary applicant of the ApplyResponse.
      * @param response The ApplyResponse returned by the Underwriter service.
      */
     public void sendApprovalEmail(ApplyResponse response) {
@@ -44,6 +43,49 @@ public class ApplicationEmailService {
 
         emailService.sendHtmlEmail("Welcome to Aline Financial", "application/approved-notification", email, variables);
 
+    }
+
+
+    /**
+     * Send a denial email to the primary applicant of the ApplyResponse.
+     * @param response The ApplyResponse returned by the Underwriter service.
+     */
+    public void sendDenialEmail(ApplyResponse response) {
+        ApplicantResponse primaryApplicant = getPrimaryApplicantResponse(response);
+        String email = primaryApplicant.getEmail();
+        String name = primaryApplicant.getFirstName();
+        String landingPortalUrl = appConfig.getLandingPortal();
+        String reason = response.getReason();
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("name", name);
+        variables.put("reason", reason);
+        variables.put("landingPortalUrl", landingPortalUrl);
+
+        emailService.sendHtmlEmail("Thank you for applying!", "application/denied-notification", email, variables);
+    }
+
+    /**
+     * Send a pending email to the primary applicant of the ApplyResponse.
+     * @param response The ApplyResponse returned by the Underwriter service.
+     */
+    public void sendPendingEmail(ApplyResponse response) {
+        ApplicantResponse primaryApplicant = getPrimaryApplicantResponse(response);
+        String email = primaryApplicant.getEmail();
+        String name = primaryApplicant.getFirstName();
+        String landingPortalUrl = appConfig.getLandingPortal();
+        String reason = response.getReason();
+
+        Map<String, String> variables = new HashMap<>();
+        variables.put("name", name);
+        variables.put("reason", reason);
+        variables.put("landingPortalUrl", landingPortalUrl);
+
+        emailService.sendHtmlEmail("Thank you for applying!", "application/pending-notification", email, variables);
+    }
+
+    private ApplicantResponse getPrimaryApplicantResponse(ApplyResponse response) {
+        return response.getApplicants().get(0);
     }
 
 }

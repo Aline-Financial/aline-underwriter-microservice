@@ -55,6 +55,7 @@ public class ApplicationService {
     private final UnderwriterService underwriterService;
     private final MemberService memberService;
     private final AccountService accountService;
+    private final ApplicationEmailService emailService;
     private final ApplicationRepository repository;
 
     @Autowired
@@ -217,6 +218,22 @@ public class ApplicationService {
                 .map(application -> mapper.map(application, ApplicationResponse.class));
 
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
+    }
+
+    public ApplyResponse applyAndSendEmail(ApplyRequest request) {
+        return apply(request, response -> {
+            switch (response.getStatus()) {
+                case APPROVED:
+                    emailService.sendApprovalEmail(response);
+                    break;
+                case PENDING:
+                    emailService.sendPendingEmail(response);
+                    break;
+                case DENIED:
+                    emailService.sendDenialEmail(response);
+                    break;
+            }
+        });
     }
 
     /**

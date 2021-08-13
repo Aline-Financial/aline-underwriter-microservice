@@ -4,8 +4,6 @@ import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.model.Application;
-import com.aline.core.model.ApplicationStatus;
-import com.aline.underwritermicroservice.service.ApplicationEmailService;
 import com.aline.underwritermicroservice.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,7 +47,6 @@ public class ApplicationController {
     private int port;
 
     private final ApplicationService service;
-    private final ApplicationEmailService emailService;
 
     /**
      * Retrieve an application by it's ID.
@@ -103,12 +100,7 @@ public class ApplicationController {
     })
     @PostMapping
     public ResponseEntity<ApplyResponse> apply(@RequestBody @Valid ApplyRequest request) {
-        ApplyResponse applyResponse = service
-                .apply(request, response -> {
-                    if (response.getStatus() == ApplicationStatus.APPROVED) {
-                        emailService.sendApprovalEmail(response);
-                    }
-                });
+        ApplyResponse applyResponse = service.applyAndSendEmail(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
