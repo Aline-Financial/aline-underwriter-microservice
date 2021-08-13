@@ -75,8 +75,7 @@ class ApplicationControllerTest {
         mock.perform(get("/applications/{id}", applicationId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(applicationId))
-                .andDo(print());
+                .andExpect(jsonPath("$.id").value(applicationId));
 
     }
 
@@ -124,7 +123,6 @@ class ApplicationControllerTest {
                 .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
-                .andDo(print())
                 .andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -174,8 +172,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isConflict())
-                .andDo(print());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -198,8 +195,7 @@ class ApplicationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("location"))
-                .andDo(print());
+                .andExpect(header().exists("location"));
     }
 
     @Test
@@ -221,8 +217,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isNotFound())
-                .andDo(print());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -237,8 +232,7 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                .andExpect(status().isBadRequest());
 
         ApplyRequest request2 = ApplyRequest.builder()
                 .applicationType(ApplicationType.CHECKING)
@@ -251,7 +245,6 @@ class ApplicationControllerTest {
         mock.perform(post("/applications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body2))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                .andExpect(status().isBadRequest());
     }
 }

@@ -225,8 +225,7 @@ class ApplicantControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].id").value(2))
-                .andExpect(jsonPath("$.content[1].id").value(1))
-                .andDo(print());
+                .andExpect(jsonPath("$.content[1].id").value(1));
     }
 
     @Test
@@ -264,8 +263,7 @@ class ApplicantControllerTest {
             searchApplicants("michigan")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(5))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(5));
         }
 
         @Test
@@ -273,8 +271,7 @@ class ApplicantControllerTest {
             searchApplicants("MICHIGAN")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(5))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(5));
         }
 
         @Test
@@ -282,8 +279,7 @@ class ApplicantControllerTest {
             searchApplicants("Michigan")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(5))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(5));
         }
 
         @Test
@@ -291,8 +287,7 @@ class ApplicantControllerTest {
             searchApplicants("los angeles michigan")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(8))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(8));
         }
 
         @Test
@@ -300,8 +295,7 @@ class ApplicantControllerTest {
             searchApplicants("LOS ANGELES MICHIGAN")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(8))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(8));
         }
 
         @Test
@@ -309,8 +303,7 @@ class ApplicantControllerTest {
             searchApplicants("los angeles michigan")
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content").isNotEmpty())
-                    .andExpect(jsonPath("$.content.length()").value(8))
-                    .andDo(print());
+                    .andExpect(jsonPath("$.content.length()").value(8));
         }
 
     }
