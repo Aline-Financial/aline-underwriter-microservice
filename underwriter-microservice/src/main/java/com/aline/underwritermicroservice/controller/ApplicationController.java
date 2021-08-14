@@ -66,6 +66,10 @@ public class ApplicationController {
                 .body(service.getApplicationById(id));
     }
 
+    @Operation(description = "Get a paginated response of all applicants")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated applications. The content array may be empty which means no applications exist.")
+    })
     @GetMapping
     public ResponseEntity<Page<ApplicationResponse>> getAllApplications(
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC)
@@ -96,7 +100,8 @@ public class ApplicationController {
             @ApiResponse(responseCode = "201", description = "Application was successfully created and either approved, denied, or set to pending."),
             @ApiResponse(responseCode = "404", description = "Creating an application with existing applicants and one or more of the existing applicants do not exist."),
             @ApiResponse(responseCode = "409", description = "There was a conflict with creating one or more of the applicants. There is a conflict with the specified unique columns."),
-            @ApiResponse(responseCode = "400", description = "Application could not be processed for some reason.")
+            @ApiResponse(responseCode = "400", description = "Application could not be processed for some reason."),
+            @ApiResponse(responseCode = "502", description = "The application notification email was not sent.")
     })
     @PostMapping
     public ResponseEntity<ApplyResponse> apply(@RequestBody @Valid ApplyRequest request) {
