@@ -7,10 +7,11 @@ import com.aline.core.dto.response.ApplyAccountResponse;
 import com.aline.core.dto.response.ApplyMemberResponse;
 import com.aline.core.dto.response.ApplyResponse;
 import com.aline.core.dto.response.PaginatedResponse;
+import com.aline.core.exception.BadGatewayException;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
+import com.aline.core.exception.UnprocessableException;
 import com.aline.core.exception.NotFoundException;
-import com.aline.core.exception.conflict.ApplicantConflictException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -48,6 +49,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j(topic = "Application Service")
+@Transactional(rollbackOn = {
+        BadRequestException.class,
+        ConflictException.class,
+        NotFoundException.class,
+        UnprocessableException.class,
+        BadGatewayException.class
+})
 public class ApplicationService {
 
     private ModelMapper mapper;
@@ -98,11 +106,6 @@ public class ApplicationService {
      * existing applicants instead. This will allow for a front end to create applicants first to verify
      * correctness and then apply.
      */
-    @Transactional(rollbackOn = {
-            ConflictException.class,
-            NotFoundException.class,
-            NullPointerException.class
-    })
     public ApplyResponse apply(@Valid ApplyRequest request, ApplyResponseConsumer responseConsumer) {
 
         log.info("Starting new application: {}", request.getApplicationType());
@@ -232,12 +235,6 @@ public class ApplicationService {
     /**
      * Overloaded method of apply with no consumer.
      */
-    @Transactional(rollbackOn = {
-            ApplicantConflictException.class,
-            ConflictException.class,
-            NotFoundException.class,
-            NullPointerException.class
-    })
     public ApplyResponse apply(@Valid ApplyRequest request) {
         return apply(request, null);
     }
