@@ -10,7 +10,7 @@ import com.aline.core.dto.response.PaginatedResponse;
 import com.aline.core.exception.BadGatewayException;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
-import com.aline.core.exception.NotCreatedException;
+import com.aline.core.exception.UnprocessableException;
 import com.aline.core.exception.NotFoundException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
         BadRequestException.class,
         ConflictException.class,
         NotFoundException.class,
-        NotCreatedException.class,
+        UnprocessableException.class,
         BadGatewayException.class
 })
 public class ApplicationService {
