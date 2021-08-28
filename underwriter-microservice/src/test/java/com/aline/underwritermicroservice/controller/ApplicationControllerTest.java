@@ -8,7 +8,6 @@ import com.aline.core.model.ApplicationType;
 import com.aline.core.model.Gender;
 import com.aline.core.repository.AccountRepository;
 import com.aline.core.repository.MemberRepository;
-import com.aline.core.test.DisabledSecurityTest;
 import com.aline.underwritermicroservice.service.ApplicationEmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,7 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j(topic = "Application Controller Integration Test")
 @Sql(scripts = {"/scripts/applicants.sql", "/scripts/applications.sql"})
 @Transactional
-class ApplicationControllerTest extends DisabledSecurityTest {
+@TestPropertySource("classpath:application-unsecured-test.properties")
+class ApplicationControllerTest {
 
     @Autowired
     MockMvc mock;

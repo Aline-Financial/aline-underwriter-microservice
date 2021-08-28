@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +58,7 @@ public class ApplicantController {
      * @return ResponseEntity with location to the created resource.
      * @apiNote Exceptions will be caught by the GlobalExceptionHandler
      */
-    @Operation(description = "Create an Applicant")
+    @Operation(description = "Manually create an Applicant")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Applicant successfully created."),
             @ApiResponse(responseCode = "404", description = "Applicant data is not valid. (Bad request)"),
@@ -150,6 +151,7 @@ public class ApplicantController {
      * @param pageable Pageable object that contains the default params for the query.
      * @return ResponseEntity of type Page with generic ApplicantResponse.
      */
+    @PreAuthorize("hasAnyAuthority(@roles.admin, @roles.employee)")
     @Operation(description = "Get all Applicants (Paginated)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retrieve a populated or empty page of applicants.")
