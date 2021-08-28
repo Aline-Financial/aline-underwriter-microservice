@@ -19,27 +19,26 @@ import com.aline.core.model.ApplicationStatus;
 import com.aline.core.model.Member;
 import com.aline.core.model.account.Account;
 import com.aline.core.repository.ApplicationRepository;
-import com.aline.core.util.SearchSpecification;
+import com.aline.core.security.annotation.PermitAll;
+import com.aline.core.security.annotation.RoleIsAdmin;
+import com.aline.core.security.annotation.RoleIsManagement;
 import com.aline.underwritermicroservice.service.function.ApplyResponseConsumer;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.DiscriminatorValue;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +84,7 @@ public class ApplicationService {
      * @return ApplicationResponse DTO
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
-    @PreAuthorize("permitAll()")
+    @PermitAll
     public ApplicationResponse getApplicationResponseById(long id) {
         return mapper.map(proxyService.getApplicationById(id), ApplicationResponse.class);
     }
@@ -100,23 +99,23 @@ public class ApplicationService {
      * @param id ID of the application to be deleted.
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
-    @PreAuthorize("hasAuthority(@roles.admin)")
+    @RoleIsAdmin
     public void deleteApplication(long id) {
         Application toDelete = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
         repository.delete(toDelete); 
     }
 
     /**
-     * Create new application with all brand new applicants or all existing applicants.
+     * Create new application with all brand-new applicants or all existing applicants.
      * @param request ApplyRequest dto with request information.
      * @param responseConsumer ApplicationResponseConsumer contains logic to run after response is received
      *                         from the underwriting service and before the ApplicationResponse object
      *                         is returned by the method.
      * @return ApplicationResponse containing the newly created applicants and the application status.
-     * @apiNote This method will create all of the CreateApplicant dto objects within
-     * the applicants property first. If the applicants cannot be created for any reason, the process
+     * @apiNote This method will create all the CreateApplicant dto objects within
+     * the applicants' property first. If the applicants cannot be created for any reason, the process
      * will stop and throw an error. However, if the ApplyRequest is flagged with <code>noApplicants</code>
-     * then it will use a list of ids of existing applicants and it will create an application with those
+     * then it will use a list of ids of existing applicants, and it will create an application with those
      * existing applicants instead. This will allow for a front end to create applicants first to verify
      * correctness and then apply.
      */
@@ -229,13 +228,19 @@ public class ApplicationService {
      * @param search Search term if any. (Must be at least an empty string)
      * @return PaginatedResponse of Applications.
      */
-    public PaginatedResponse<ApplicationResponse> getAllApplications(@NotNull Pageable pageable, @NotNull final String search) {
-        SearchSpecification<Application> spec = new SearchSpecification<>(search);
-        Page<ApplicationResponse> responsePage = repository.findAll(spec, pageable)
-                .map(application -> mapper.map(application, ApplicationResponse.class));
-
+    @RoleIsManagement
+    public PaginatedResponse<ApplicationResponse> getAllApplications(@NonNull Pageable pageable, @NonNull final String search) {
+        // ignoring search for now
+        Page<ApplicationResponse> responsePage = repository.findAll(pageable)
+                .map(this::mapToResponse);
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());
     }
+
+    // Map application to an application response DTO
+    public ApplicationResponse mapToResponse(Application application) {
+        return mapper.map(application, ApplicationResponse.class);
+    }
+
 
     /**
      * Send an email based on the application response status.

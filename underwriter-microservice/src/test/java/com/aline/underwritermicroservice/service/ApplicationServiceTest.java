@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.annotations.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringBootUnitTest;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;

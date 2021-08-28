@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice.controller;
 
-import com.aline.core.annotations.test.SpringBootIntegrationTest;
+import com.aline.core.annotation.test.SpringBootIntegrationTest;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;

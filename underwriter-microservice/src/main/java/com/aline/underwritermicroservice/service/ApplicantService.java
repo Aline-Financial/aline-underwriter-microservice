@@ -10,7 +10,9 @@ import com.aline.core.exception.conflict.PhoneConflictException;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.repository.ApplicantRepository;
-import com.aline.core.util.SearchSpecification;
+import com.aline.core.security.annotation.RoleIsManagement;
+import com.aline.core.util.SimpleSearchSpecification;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -22,7 +24,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 /**
  * Applicant Service
@@ -122,9 +123,9 @@ public class ApplicantService {
      * @param search Search term if any. (Must be at least an empty string)
      * @return PaginatedResponse of Applicants.
      */
-    @PreAuthorize("hasAnyAuthority(@roles.management)")
-    public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull final String search) {
-        SearchSpecification<Applicant> spec = new SearchSpecification<>(search);
+    @RoleIsManagement
+    public PaginatedResponse<ApplicantResponse> getApplicants(@NonNull final Pageable pageable, @NonNull final String search) {
+        SimpleSearchSpecification<Applicant> spec = new SimpleSearchSpecification<>(search);
         Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
                 .map(applicant -> mapper.map(applicant, ApplicantResponse.class));
         return new PaginatedResponse<>(responsePage.getContent(), pageable, responsePage.getTotalElements());

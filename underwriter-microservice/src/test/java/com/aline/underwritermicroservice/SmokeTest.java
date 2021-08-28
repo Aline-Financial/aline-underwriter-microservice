@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice;
 
-import com.aline.core.annotations.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringBootUnitTest;
 import com.aline.underwritermicroservice.controller.ApplicantController;
 import com.aline.underwritermicroservice.controller.RootController;
 import org.junit.jupiter.api.Test;

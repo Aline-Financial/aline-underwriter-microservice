@@ -1,6 +1,6 @@
 package com.aline.underwritermicroservice.service;
 
-import com.aline.core.annotations.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringBootUnitTest;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
