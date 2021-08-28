@@ -151,7 +151,6 @@ public class ApplicantController {
      * @param pageable Pageable object that contains the default params for the query.
      * @return ResponseEntity of type Page with generic ApplicantResponse.
      */
-    @PreAuthorize("hasAnyAuthority(@roles.admin, @roles.employee)")
     @Operation(description = "Get all Applicants (Paginated)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retrieve a populated or empty page of applicants.")
