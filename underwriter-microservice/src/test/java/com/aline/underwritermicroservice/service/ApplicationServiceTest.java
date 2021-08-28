@@ -89,7 +89,7 @@ class ApplicationServiceTest {
 
     @Test
     void getApplicationById_returns_applicationResponse_with_correct_info() {
-        ApplicationResponse response = service.getApplicationById(FOUND);
+        ApplicationResponse response = service.getApplicationResponseById(FOUND);
         assertEquals(1, response.getId());
         assertEquals(ApplicationStatus.APPROVED.name(), response.getApplicationStatus());
         assertEquals(ApplicationType.CHECKING.name(), response.getApplicationType());
@@ -98,7 +98,7 @@ class ApplicationServiceTest {
 
     @Test
     void getApplicationById_throws_applicationNotFoundException() {
-        assertThrows(ApplicationNotFoundException.class, () -> service.getApplicationById(NOT_FOUND));
+        assertThrows(ApplicationNotFoundException.class, () -> service.getApplicationResponseById(NOT_FOUND));
     }
 
     @Test

@@ -10,8 +10,8 @@ import com.aline.core.dto.response.PaginatedResponse;
 import com.aline.core.exception.BadGatewayException;
 import com.aline.core.exception.BadRequestException;
 import com.aline.core.exception.ConflictException;
-import com.aline.core.exception.UnprocessableException;
 import com.aline.core.exception.NotFoundException;
+import com.aline.core.exception.UnprocessableException;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
 import com.aline.core.model.Application;
@@ -26,8 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.DiscriminatorValue;
@@ -56,6 +62,7 @@ import java.util.stream.Collectors;
         UnprocessableException.class,
         BadGatewayException.class
 })
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ApplicationService {
 
     private ModelMapper mapper;
@@ -65,6 +72,7 @@ public class ApplicationService {
     private final AccountService accountService;
     private final ApplicationEmailService emailService;
     private final ApplicationRepository repository;
+    private final ApplicationService proxyService;
 
     @Autowired
     public void setMapper(@Qualifier("defaultModelMapper") ModelMapper mapper) {
@@ -73,13 +81,18 @@ public class ApplicationService {
 
     /**
      * Get Application By ID
-     * @param id Id of the retrieved application.
+     * @param id ID of the retrieved application.
      * @return ApplicationResponse DTO
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
-    public ApplicationResponse getApplicationById(long id) {
-        Application application = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
-        return mapper.map(application, ApplicationResponse.class);
+    @PreAuthorize("permitAll()")
+    public ApplicationResponse getApplicationResponseById(long id) {
+        return mapper.map(proxyService.getApplicationById(id), ApplicationResponse.class);
+    }
+
+    @PostAuthorize("@applicationAuth.canAccess(returnObject)")
+    public Application getApplicationById(long id) {
+        return repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
     }
 
     /**
@@ -87,6 +100,7 @@ public class ApplicationService {
      * @param id ID of the application to be deleted.
      * @throws ApplicationNotFoundException If application with the provided ID does not exist.
      */
+    @PreAuthorize("hasAuthority(@roles.admin)")
     public void deleteApplication(long id) {
         Application toDelete = repository.findById(id).orElseThrow(ApplicationNotFoundException::new);
         repository.delete(toDelete); 
@@ -215,7 +229,7 @@ public class ApplicationService {
      * @param search Search term if any. (Must be at least an empty string)
      * @return PaginatedResponse of Applications.
      */
-    public PaginatedResponse<ApplicationResponse> getAllApplications(@NotNull   Pageable pageable, @NotNull final String search) {
+    public PaginatedResponse<ApplicationResponse> getAllApplications(@NotNull Pageable pageable, @NotNull final String search) {
         SearchSpecification<Application> spec = new SearchSpecification<>(search);
         Page<ApplicationResponse> responsePage = repository.findAll(spec, pageable)
                 .map(application -> mapper.map(application, ApplicationResponse.class));

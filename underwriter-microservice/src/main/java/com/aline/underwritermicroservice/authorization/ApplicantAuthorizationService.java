@@ -21,7 +21,7 @@ public class ApplicantAuthorizationService extends AbstractAuthorizationService<
         Optional<Applicant> applicantOptional = repository.findApplicantByUsername(getUsername());
         if (applicantOptional.isPresent()) {
             Applicant applicant = applicantOptional.get();
-            return (Objects.equals(applicant.getId(), id) || userIsManagement());
+            return (Objects.equals(applicant.getId(), id) || roleIsManagement());
         }
         return false;
     }
