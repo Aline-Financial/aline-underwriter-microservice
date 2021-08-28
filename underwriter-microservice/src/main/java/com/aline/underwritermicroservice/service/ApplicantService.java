@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -86,6 +87,7 @@ public class ApplicantService {
      * @return Applicant with queried ID.
      * @throws ApplicantNotFoundException If applicant with the queried ID does not exist.
      */
+    @PreAuthorize("@applicantAuth.canAccess(#id)")
     public ApplicantResponse getApplicantById(long id) {
         Applicant found = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
         return mapper.map(found, ApplicantResponse.class);
