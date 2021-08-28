@@ -100,6 +100,7 @@ public class ApplicantService {
      * @param newValues The new values to modify the applicant information with.
      *
      */
+    @PreAuthorize("@applicantAuth.canAccess(#id)")
     public void updateApplicant(long id, @Valid UpdateApplicant newValues) {
         validateUniqueness(newValues.getEmail(),
                 newValues.getPhone(),
@@ -118,6 +119,7 @@ public class ApplicantService {
      * @param id ID of the applicant to be deleted.
      * @throws ApplicantNotFoundException If applicant with the queried ID does not exist.
      */
+    @PreAuthorize("hasAnyAuthority(@roles.management)")
     public void deleteApplicant(long id) {
         Applicant toDelete = repository.findById(id).orElseThrow(ApplicantNotFoundException::new);
         repository.delete(toDelete);
@@ -130,6 +132,7 @@ public class ApplicantService {
      * @param search Search term if any. (Must be at least an empty string)
      * @return PaginatedResponse of Applicants.
      */
+    @PreAuthorize("hasAnyAuthority(@roles.management)")
     public PaginatedResponse<ApplicantResponse> getApplicants(@NotNull final Pageable pageable, @NotNull final String search) {
         SearchSpecification<Applicant> spec = new SearchSpecification<>(search);
         Page<ApplicantResponse> responsePage = repository.findAll(spec, pageable)
