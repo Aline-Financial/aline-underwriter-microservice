@@ -72,16 +72,6 @@ public class ApplicantService {
     }
 
     /**
-     * Retrieves an applicant by username
-     * @param username The username of the user that is linked to the applicant
-     * @return An applicant linked to the username
-     */
-    public Applicant getApplicantByUsername(String username) {
-        return repository.findApplicantByUsername(username)
-                .orElseThrow(ApplicantNotFoundException::new);
-    }
-
-    /**
      * Finds an applicant entity by <code>id</code> property.
      * @param id ID of the Applicant being queried.
      * @return Applicant with queried ID.
