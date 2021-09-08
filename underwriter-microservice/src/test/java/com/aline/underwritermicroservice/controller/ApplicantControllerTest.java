@@ -1,5 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
+import com.aline.core.annotation.test.SpringBootIntegrationTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
@@ -13,10 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -39,9 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration test for {@link ApplicantController}
  */
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootIntegrationTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 @DisplayName("Applicant Controller Integration Test")
 @Slf4j(topic = "Applicant Controller Integration Test")
 @Sql(scripts = "/scripts/applicants.sql")

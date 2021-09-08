@@ -1,5 +1,7 @@
 package com.aline.underwritermicroservice.service;
 
+import com.aline.core.annotation.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
@@ -13,9 +15,7 @@ import com.aline.core.repository.ApplicantRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,8 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles("test")
-@SpringBootTest
+@SpringBootUnitTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 class ApplicantServiceTest {
 
     private final long FOUND = 1;

@@ -49,7 +49,7 @@ public class ApplicationController {
     private final ApplicationService service;
 
     /**
-     * Retrieve an application by it's ID.
+     * Retrieve an application by its ID.
      * @param id The id of the application to be retrieved.
      * @return ResponseEntity of an ApplicationResponse.
      */
@@ -63,7 +63,7 @@ public class ApplicationController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(service.getApplicationById(id));
+                .body(service.getApplicationResponseById(id));
     }
 
     @Operation(description = "Get a paginated response of all applicants")
