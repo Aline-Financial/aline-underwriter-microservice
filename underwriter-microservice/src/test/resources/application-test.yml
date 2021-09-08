@@ -21,6 +21,8 @@ spring:
 app:
   security:
     secret-key: "ThisIsAGreatSecretKey!!!"
+    jwt:
+      secret-key: "ThisIsAJWTAuthenticationSecretKey"
   email:
     enable: true
 
