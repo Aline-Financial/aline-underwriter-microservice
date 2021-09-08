@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.service;
 
 import com.aline.core.annotation.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.dto.response.ApplicantResponse;
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootUnitTest
+@SpringBootUnitTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 class ApplicantServiceTest {
 
     private final long FOUND = 1;

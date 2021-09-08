@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.service;
 
 import com.aline.core.annotation.test.SpringBootUnitTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.response.ApplicationResponse;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
 import com.aline.core.model.Applicant;
@@ -27,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootUnitTest
+@SpringBootUnitTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 @Slf4j(topic = "Application Service Test")
 class ApplicationServiceTest {
 

@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.annotation.test.SpringBootIntegrationTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.request.ApplyRequest;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.exception.notfound.ApplicationNotFoundException;
@@ -37,12 +38,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootIntegrationTest
+@SpringBootIntegrationTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 @DisplayName("Application Controller Integration Test")
 @Slf4j(topic = "Application Controller Integration Test")
 @Sql(scripts = {"/scripts/applicants.sql", "/scripts/applications.sql"})
 @Transactional
-@TestPropertySource("classpath:application-unsecured-test.properties")
 class ApplicationControllerTest {
 
     @Autowired

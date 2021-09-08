@@ -1,6 +1,7 @@
 package com.aline.underwritermicroservice.controller;
 
 import com.aline.core.annotation.test.SpringBootIntegrationTest;
+import com.aline.core.annotation.test.SpringTestProperties;
 import com.aline.core.dto.request.CreateApplicant;
 import com.aline.core.dto.request.UpdateApplicant;
 import com.aline.core.exception.notfound.ApplicantNotFoundException;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration test for {@link ApplicantController}
  */
-@SpringBootIntegrationTest
+@SpringBootIntegrationTest(SpringTestProperties.DISABLE_WEB_SECURITY)
 @DisplayName("Applicant Controller Integration Test")
 @Slf4j(topic = "Applicant Controller Integration Test")
 @Sql(scripts = "/scripts/applicants.sql")
