@@ -5,7 +5,6 @@ import com.aline.underwritermicroservice.controller.ApplicantController;
 import com.aline.underwritermicroservice.controller.RootController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.system.JavaVersion;
 import org.springframework.core.SpringVersion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +34,6 @@ class SmokeTest {
     void usingCorrectVersions() {
         assertNotNull(SpringVersion.getVersion());
         assertTrue(SpringVersion.getVersion().startsWith("5"));
-        assertEquals("1.8", JavaVersion.getJavaVersion().toString());
     }
 
 }
