@@ -27,11 +27,11 @@ pipeline {
 
         }
 
-        stage("Test and Package") {
+        stage("Package Jar") {
         
             steps {
 
-                sh "mvn package"
+                sh "mvn package -DskipTests"
 
             }
         
@@ -96,6 +96,18 @@ pipeline {
                     --no-fail-on-empty-changeset
                 '''
             }
+
+        }
+
+    }
+
+    post {
+
+        always {
+        
+            sh "mvn clean"
+            sh "docker image rm ${APP_NAME}/${APP_ENV}/${SERVICE_NAME}:${COMMIT_HASH}"
+            sh "docker image rm ${AWS_ID}.dkr.ecr.${REGION}.amazonaws.com/${APP_NAME}/${APP_ENV}/${SERVICE_NAME}:${COMMIT_HASH}"
 
         }
 
