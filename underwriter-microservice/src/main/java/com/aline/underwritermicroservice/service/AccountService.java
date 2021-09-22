@@ -4,6 +4,7 @@ import com.aline.core.exception.BadRequestException;
 import com.aline.core.model.ApplicationType;
 import com.aline.core.model.Member;
 import com.aline.core.model.account.Account;
+import com.aline.core.model.account.AccountStatus;
 import com.aline.core.model.account.CheckingAccount;
 import com.aline.core.model.account.SavingsAccount;
 import com.aline.core.repository.AccountRepository;
@@ -60,6 +61,7 @@ public class AccountService {
                 .primaryAccountHolder(primaryAccountHolder)
                 .balance(0)
                 .availableBalance(0)
+                .status(AccountStatus.ACTIVE)
                 .members(members)
                 .build();
         return Optional.of(repository.save(account)).orElseThrow(() -> new BadRequestException("Account was not saved."));
@@ -71,6 +73,7 @@ public class AccountService {
                 .balance(0)
                 .apy(0.006f)
                 .members(members)
+                .status(AccountStatus.ACTIVE)
                 .build();
         return Optional.of(repository.save(account)).orElseThrow(() -> new BadRequestException("Account was not saved."));
     }
