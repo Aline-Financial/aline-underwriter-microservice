@@ -69,7 +69,7 @@ public class AccountService {
         SavingsAccount account = SavingsAccount.builder()
                 .primaryAccountHolder(primaryAccountHolder)
                 .balance(0)
-                .apy(0.06f)
+                .apy(0.006f)
                 .members(members)
                 .build();
         return Optional.of(repository.save(account)).orElseThrow(() -> new BadRequestException("Account was not saved."));
