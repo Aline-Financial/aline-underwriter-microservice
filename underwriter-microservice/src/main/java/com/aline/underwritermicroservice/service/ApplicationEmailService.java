@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The application email service sends emails
@@ -57,7 +59,7 @@ public class ApplicationEmailService {
         String email = primaryApplicant.getEmail();
         String name = primaryApplicant.getFirstName();
         String landingPortalUrl = appConfig.getLandingPortal();
-        String reason = response.getReason();
+        String reason = String.join(", ", response.getReason());
 
         Map<String, String> variables = new HashMap<>();
         variables.put("name", name);
@@ -76,7 +78,7 @@ public class ApplicationEmailService {
         String email = primaryApplicant.getEmail();
         String name = primaryApplicant.getFirstName();
         String landingPortalUrl = appConfig.getLandingPortal();
-        String reason = response.getReason();
+        String reason = String.join(", ", response.getReason());
 
         Map<String, String> variables = new HashMap<>();
         variables.put("name", name);
