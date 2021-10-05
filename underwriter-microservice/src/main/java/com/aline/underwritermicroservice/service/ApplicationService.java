@@ -176,7 +176,7 @@ public class ApplicationService {
                         log.info("Received underwriting status: {}\nAnd reason: {}", status, reason);
                         savedApplication.setApplicationStatus(status);
                         response.setStatus(status);
-                        response.setReason(reason);
+                        response.setReasons(reason);
 
                         if (status == ApplicationStatus.APPROVED) {
                             log.info("Application was approved... Creating members.");

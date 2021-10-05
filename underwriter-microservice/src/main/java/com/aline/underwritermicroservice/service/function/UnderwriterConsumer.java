@@ -4,5 +4,5 @@ import com.aline.core.model.ApplicationStatus;
 
 @FunctionalInterface
 public interface UnderwriterConsumer {
-    void respond(ApplicationStatus status, String reason);
+    void respond(ApplicationStatus status, String[] reasons);
 }

@@ -2,8 +2,6 @@ server:
   port: ${APP_PORT}
 
 spring:
-  profiles:
-    active: "default"
   application:
     name: "underwriter-microservice"
   jpa:
